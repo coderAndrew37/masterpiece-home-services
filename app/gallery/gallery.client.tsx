@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import PageTransition from '@/components/PageTransition';
 import CtaBanner from '@/components/CtaBanner';
+import PageTransition from '@/components/PageTransition';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 
 export interface Category {
   id: string;

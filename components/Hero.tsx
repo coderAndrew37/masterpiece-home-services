@@ -11,7 +11,7 @@ const Hero = () => {
       }}
     >
       {/* Darker overlay for better contrast */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.1)] to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-2xl">
@@ -21,7 +21,7 @@ const Hero = () => {
             transition={{ duration: 0.6 }}
             className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg"
           >
-            Professional Window Cleaning Services
+            Kamloops&apos; Trusted Exterior & Seasonal Home Care
           </motion.h1>
 
           <motion.p
@@ -30,7 +30,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-white mb-8 drop-shadow"
           >
-            Bringing clarity to your home and business with streak-free results
+            From streak-free windows and clear eavestroughs to full house washing and custom Christmas light displays—keeping your property immaculate all year long.
           </motion.p>
 
           <motion.div
