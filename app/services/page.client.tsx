@@ -1,24 +1,17 @@
 'use client';
 
-import PageTransition from '@/components/PageTransition';
-import ServiceDetail from '@/components/ServiceDetail';
-import ServiceBenefits from '@/components/ServiceBenefits';
-import PricingTable from '@/components/PricingTable';
 import CtaBanner from '@/components/CtaBanner';
-
-export interface ServiceItem {
-  id: number;
-  title: string;
-  description: string;
-  features: string[];
-  icon: string;
-}
-
-export interface PricingOption {
-  service: string;
-  details: string;
-  price: string;
-}
+import CustomQuoteBanner from '@/components/CustomQuoteBanner';
+import PageTransition from '@/components/PageTransition';
+import PricingTable from '@/components/PricingTable';
+import ServiceBenefits from '@/components/ServiceBenefits';
+import ServiceDetail from '@/components/ServiceDetail';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import React from 'react';
+import { FiGrid } from 'react-icons/fi';
+import { PricingOption} from './page';
+import { ServiceItem } from '@/types';
 
 interface ServicesClientProps {
   services: ServiceItem[];
@@ -30,49 +23,93 @@ export default function ServicesClient({
   services,
   benefits,
   pricing,
-}: ServicesClientProps) {
+}: ServicesClientProps): React.JSX.Element {
   return (
     <PageTransition>
-      <div className="bg-blue-900 py-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Our Services
-        </h1>
-        <p className="text-xl text-blue-200 max-w-3xl mx-auto">
-          Professional window cleaning and exterior maintenance services for
-          residential and commercial properties
-        </p>
-      </div>
-
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {services.map((service) => (
-            <ServiceDetail
-              key={service.id}
-              title={service.title}
-              description={service.description}
-              features={service.features}
-              icon={service.icon}
-            />
-          ))}
+      {/* 1. Hero Header */}
+      <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/residential-1.jpg"
+            alt="Masterpiece Services Kamloops"
+            fill
+            priority
+            quality={85}
+            className="object-cover object-center opacity-30 scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
         </div>
 
-        <ServiceBenefits
-          title="Why Professional Window Cleaning Matters"
-          benefits={benefits}
-        />
+        <div className="container mx-auto px-4 max-w-7xl relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-600/80 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider mb-4 border border-blue-400/30">
+            <FiGrid className="w-3.5 h-3.5" /> Full-Property Care
+          </div>
 
-        <PricingTable
-          title="Transparent Pricing"
-          description="No hidden fees - all prices include labor, equipment, and eco-friendly cleaning solutions"
-          pricingOptions={pricing}
-        />
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-4"
+          >
+            Our Property <span className="text-blue-400">Services</span>
+          </motion.h1>
 
-        <CtaBanner
-          title="Custom Solutions for Your Property"
-          description="Contact us for a personalized quote based on your specific needs"
-          buttonText="Get Custom Quote"
-        />
-      </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed"
+          >
+            From pure-water window wash and soft washing to indoor housekeeping and winter light hanging across Kamloops.
+          </motion.p>
+        </div>
+      </section>
+
+      {/* 2. Main Services Grid */}
+      <section className="py-20 bg-slate-50">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold text-blue-700 uppercase tracking-widest block mb-2">
+              What We Do
+            </span>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              Complete Exterior & Interior Solutions
+            </h2>
+            <p className="text-slate-600 text-sm mt-2">
+              Click any service below to explore full details, process explanations, and standalone pricing.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {services.map((service) => (
+              <ServiceDetail key={service.id} service={service} />
+            ))}
+          </div>
+
+          {/* 3. Custom Project / Need Something Unique Banner */}
+          <CustomQuoteBanner />
+
+          {/* 4. Why Professional Care Matters */}
+          <ServiceBenefits
+            title="Why Kamloops Homeowners Choose Masterpiece"
+            benefits={benefits}
+          />
+
+          {/* 5. Transparent Pricing Table */}
+          <PricingTable
+            title="Standard Service Rates"
+            description="Clear baseline pricing with zero hidden fees. Includes all equipment, labor, and eco-safe products."
+            pricingOptions={pricing}
+          />
+
+          {/* 6. CTA Banner */}
+          <CtaBanner
+            tagline="Kamloops & Surrounding Areas"
+            title="Ready to Schedule Your Service?"
+            description="Get your free online estimate within 24 hours or call our team directly."
+            buttonText="Request Free Quote"
+          />
+        </div>
+      </section>
     </PageTransition>
   );
 }
