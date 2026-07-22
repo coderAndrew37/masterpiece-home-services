@@ -6,6 +6,7 @@ import ContactInfo from '@/components/ContactInfo';
 import ServiceAreas from '@/components/ServiceAreas';
 import CtaBanner from '@/components/CtaBanner';
 import FAQ from '@/components/FAQ';
+import Contact from '@/components/Contact';
 
 interface FAQItem {
   question: string;
@@ -17,6 +18,13 @@ interface ContactClientProps {
   faqs: FAQItem[];
 }
 
+const contactFAQs:FAQItem[]=[
+  {
+    question: "How often should I get my windows and eavestroughs cleaned in Kamloops?",
+    answer:
+      "For most Kamloops homes, we recommend exterior window detailing twice a year (spring and autumn) and eavestrough clearing at least once in late autumn to prevent pine needle buildup and winter ice dams.",
+  },
+]
 export default function ContactClient({
   serviceAreas,
   faqs,
@@ -32,29 +40,8 @@ export default function ContactClient({
         </p>
       </div>
 
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <h2 className="text-3xl font-bold text-blue-900 mb-8">
-              Send Us a Message
-            </h2>
-            <ContactForm />
-          </div>
-
-          <div>
-            <ContactInfo />
-            <ServiceAreas title="Service Areas" areas={serviceAreas} />
-          </div>
-        </div>
-
-        <FAQ title="Frequently Asked Questions" faqs={faqs} />
-
-        <CtaBanner
-          title="Ready to Experience Crystal Clear Windows?"
-          description="Contact us today for a free, no-obligation quote"
-          buttonText="Get Free Quote"
-        />
-      </div>
+     <Contact/>
+     <FAQ faqs={contactFAQs}/>
     </PageTransition>
   );
 }

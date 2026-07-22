@@ -7,6 +7,8 @@ import FAQ, { FAQItem } from '@/components/FAQ';
 import Gallery from '@/components/Gallery';
 import Hero from '@/components/Hero';
 import HomeProcess from '@/components/HomeProcess'; // <-- Replaced old ProcessSteps
+import LatestBlogs from '@/components/LatestBlogs';
+import LeadCapture from '@/components/LeadCapture';
 import PageTransition from '@/components/PageTransition';
 import ServiceArea from '@/components/ServiceArea';
 import Services from '@/components/Services';
@@ -62,6 +64,8 @@ export default function HomeClient(): React.JSX.Element {
   imageSrc="/images/residential-1.jpg" // Make sure this image exists in /public/images/
   imageAlt="Masterpiece Home Services technician in Kamloops"
 />
+<LeadCapture />
+<LatestBlogs />
       <CtaBanner
         tagline="Book Service in Kamloops"
         title="Ready for Spotless Windows & Eavestroughs?"

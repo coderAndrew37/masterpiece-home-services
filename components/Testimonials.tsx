@@ -73,24 +73,18 @@ export default function Testimonials(): React.JSX.Element {
               </p>
               
               {/* Overlapping Avatar Circles */}
-              <div className="flex justify-center -space-x-3">
-                {[...Array(6)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full border-2 border-blue-700 bg-slate-200 overflow-hidden"
-                  >
-                    <Image
-                      src={`/images/residential-1-${i + 1}.jpg`} // Replace with tiny face thumbnails if you have them, or use initials
-                      alt="Client avatar"
-                      width={40}
-                      height={40}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-                {/* Plus Icon Circle */}
-                <div className="w-10 h-10 rounded-full border-2 border-blue-700 bg-white flex items-center justify-center text-slate-900 font-bold text-lg">
-                  +
+              <div className="flex -space-x-3 shrink-0">
+                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
+                  JD
+                </div>
+                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
+                  MK
+                </div>
+                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-amber-600 text-white font-bold text-xs flex items-center justify-center">
+                  ST
+                </div>
+                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
+                  RC
                 </div>
               </div>
             </div>
