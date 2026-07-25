@@ -20,7 +20,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
         <thead>
           <tr className="bg-blue-900 text-white">
             <th className="text-left py-4 px-6">Feature</th>
-            <th className="text-center py-4 px-6">Shine Windows</th>
+            <th className="text-center py-4 px-6">Masterpiece</th>
             <th className="text-center py-4 px-6">Competitors</th>
           </tr>
         </thead>
