@@ -1,21 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import CtaBanner from '@/components/CtaBanner';
+import CustomQuoteBanner from '@/components/CustomQuoteBanner';
+import FAQ from '@/components/FAQ';
 import PageTransition from '@/components/PageTransition';
 import PricingCard from '@/components/PricingCard';
 import ServiceCalculator from '@/components/ServiceCalculator';
-import FAQ from '@/components/FAQ';
-import CtaBanner from '@/components/CtaBanner';
+import { AnimatePresence, motion } from 'framer-motion';
+import Image from 'next/image';
+import React, { useState } from 'react';
 import {
-  FiDollarSign,
-  FiCheckCircle,
-  FiPlusCircle,
-  FiShield,
-  FiZap,
+    FiDollarSign
 } from 'react-icons/fi';
-import CustomQuoteBanner from '@/components/CustomQuoteBanner';
 
 export interface PricingPlan {
   title: string;
