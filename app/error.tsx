@@ -1,5 +1,6 @@
 'use client';
 
+import { phoneNumber, phoneTel } from '@/lib/constants';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -57,8 +58,8 @@ export default function Error({
 
           <div className="pt-4 border-t border-slate-100 text-xs text-slate-500">
             Need urgent help? Call us directly at{' '}
-            <a href="tel:2505550199" className="font-bold text-blue-700 hover:underline">
-              (250) 555-0199
+            <a href={phoneTel} className="font-bold text-blue-700 hover:underline">
+              {phoneNumber}
             </a>
           </div>
         </motion.div>

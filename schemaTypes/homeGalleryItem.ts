@@ -9,7 +9,7 @@ import {ImageIcon} from '@sanity/icons/Image'
 export const homeGalleryItem = defineType({
   name: 'homeGalleryItem',
   title: 'Gallery Item',
-  type: 'object',
+  type: 'document',
   icon: ImageIcon,
   fields: [
     defineField({

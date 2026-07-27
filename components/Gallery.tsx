@@ -12,9 +12,9 @@ interface GalleryProps {
 
 // Fallback used only if Sanity returns nothing (e.g. content not yet added)
 const fallbackImages: HomeGalleryItem[] = [
-  { _key: '1', category: 'Residential', image: null, alt: 'Residential window cleaning in progress' },
-  { _key: '2', category: 'Commercial', image: null, alt: 'Commercial storefront window maintenance' },
-  { _key: '3', category: 'High-Rise', image: null, alt: 'High-rise glass facade cleaning' },
+  { _id: 'fallback-1', category: 'Residential', image: null, alt: 'Residential window cleaning in progress' },
+  { _id: 'fallback-2', category: 'Commercial', image: null, alt: 'Commercial storefront window maintenance' },
+  { _id: 'fallback-3', category: 'High-Rise', image: null, alt: 'High-rise glass facade cleaning' },
 ];
 
 const Gallery: React.FC<GalleryProps> = ({ items }) => {
@@ -23,13 +23,18 @@ const Gallery: React.FC<GalleryProps> = ({ items }) => {
 
   const images = items && items.length > 0 ? items : fallbackImages;
 
-  const categories = ['All', ...Array.from(new Set(images.map((img) => img.category)))];
+  const categories = ['All', ...Array.from(new Set(images.map((img) => img.category).filter(Boolean)))];
 
   const filteredImages =
     activeCategory === 'All' ? images : images.filter((img) => img.category === activeCategory);
 
   const getImageUrl = (item: HomeGalleryItem, width: number) => {
     if (!item.image) return '/images/residential-1.jpg'; // fallback asset
+    
+    // If the image query already expanded image to a string URL
+    if (typeof item.image === 'string') return item.image;
+
+    // Otherwise pass the image object/reference through Sanity URL builder
     return urlFor(item.image).width(width).auto('format').url();
   };
 
@@ -86,34 +91,40 @@ const Gallery: React.FC<GalleryProps> = ({ items }) => {
 
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
-            {filteredImages.map((image, index) => (
-              <motion.div
-                key={image._key}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.03 }}
-                className="overflow-hidden rounded-xl shadow-md cursor-pointer bg-white"
-                onClick={() => setSelectedImage(image)}
-              >
-                <div className="relative w-full h-64 bg-gray-100 overflow-hidden">
-                  <Image
-                    src={getImageUrl(image, 800)}
-                    alt={image.alt}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-300 hover:scale-105"
-                    priority={index < 3}
-                  />
-                </div>
+            {filteredImages.map((image, index) => {
+              // Ensure React always gets a unique key whether document (_id) or array (_key)
+              const itemKey = image._id || image._key || `gallery-item-${index}`;
+              const imageAlt = image.alt || `${image.category || 'Cleaning'} project photo`;
 
-                <div className="p-4 bg-white">
-                  <h3 className="font-bold text-blue-900">{image.category} Cleaning</h3>
-                </div>
-              </motion.div>
-            ))}
+              return (
+                <motion.div
+                  key={itemKey}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.03 }}
+                  className="overflow-hidden rounded-xl shadow-md cursor-pointer bg-white"
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <div className="relative w-full h-64 bg-gray-100 overflow-hidden">
+                    <Image
+                      src={getImageUrl(image, 800)}
+                      alt={imageAlt}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 hover:scale-105"
+                      priority={index < 3}
+                    />
+                  </div>
+
+                  <div className="p-4 bg-white">
+                    <h3 className="font-bold text-blue-900">{image.category} Cleaning</h3>
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </motion.div>
       </div>
@@ -138,7 +149,7 @@ const Gallery: React.FC<GalleryProps> = ({ items }) => {
               <div className="relative w-full h-[60vh] max-h-[600px]">
                 <Image
                   src={getImageUrl(selectedImage, 1600)}
-                  alt={selectedImage.alt}
+                  alt={selectedImage.alt || 'Gallery image full view'}
                   fill
                   className="object-contain"
                   sizes="100vw"
@@ -150,7 +161,9 @@ const Gallery: React.FC<GalleryProps> = ({ items }) => {
                   <h3 className="text-xl font-bold text-white">
                     {selectedImage.category} Cleaning
                   </h3>
-                  <p className="text-sm text-gray-400">{selectedImage.alt}</p>
+                  {selectedImage.alt && (
+                    <p className="text-sm text-gray-400">{selectedImage.alt}</p>
+                  )}
                 </div>
                 <button
                   className="text-white text-3xl font-light hover:text-blue-400 transition-colors px-3 py-1"

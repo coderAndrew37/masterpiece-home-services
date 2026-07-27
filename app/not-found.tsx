@@ -1,5 +1,6 @@
 'use client';
 
+import { phoneNumber, phoneTel } from '@/lib/constants';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import React from 'react';
@@ -84,11 +85,11 @@ export default function NotFound(): React.JSX.Element {
           <div className="mt-8 pt-6 border-t border-slate-800/60 bg-slate-950/50 -mx-8 sm:-mx-12 -mb-8 sm:-mb-12 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <span className="text-xs text-slate-400">Prefer talking to a real human?</span>
             <a
-              href="tel:2505550199"
+              href={phoneTel}
               className="inline-flex items-center gap-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-extrabold px-4 py-2 rounded-xl text-xs transition-colors"
             >
               <FiPhoneCall className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-              <span>Call Dispatch: (250) 555-0199</span>
+              <span>Call Dispatch: {phoneNumber}</span>
             </a>
           </div>
         </motion.div>

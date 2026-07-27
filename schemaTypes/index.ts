@@ -39,4 +39,4 @@ export const schema: {types: SchemaTypeDefinition[]} = {
 
 // Document type names that should only ever have a single instance.
 // Used by structure.ts to pin them in the desk and hide the "create new" option.
-export const singletonTypes = new Set(['pricingPage', 'homeGallery'])
+export const singletonTypes = new Set(['pricingPage'])

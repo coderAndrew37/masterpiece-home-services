@@ -77,14 +77,10 @@ export const metadata: Metadata = {
 // on the homepage without a full redeploy.
 export const revalidate = 60;
 
-interface HomeGalleryResult {
-  items: HomeGalleryItem[];
-}
-
 export default async function HomePage() {
-  const [latestPosts, homeGallery] = await Promise.all([
+  const [latestPosts, galleryItems] = await Promise.all([
     client.fetch<PostCard[]>(latestPostsQuery),
-    client.fetch<HomeGalleryResult | null>(homeGalleryQuery),
+    client.fetch<HomeGalleryItem[]>(homeGalleryQuery),
   ]);
 
   // LocalBusiness Structured Data (JSON-LD) for Google Local Pack & Maps Rankings
@@ -142,7 +138,7 @@ export default async function HomePage() {
       />
       <HomeClient
         latestPosts={latestPosts}
-        galleryItems={homeGallery?.items ?? []}
+        galleryItems={galleryItems ?? []}
       />
     </>
   );
