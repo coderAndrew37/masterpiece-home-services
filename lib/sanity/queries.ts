@@ -53,3 +53,17 @@ export const relatedPostsQuery = groq`
   | order(publishedAt desc)[0...3]
   ${postCardProjection}
 `;
+
+// Homepage "Our Work Gallery" section — singleton document holding
+// an array of categorized gallery images (distinct from the per-service
+// galleryImage object used on Service documents).
+export const homeGalleryQuery = groq`
+  *[_type == "homeGallery"][0]{
+    items[]{
+      _key,
+      image,
+      alt,
+      category
+    }
+  }
+`;

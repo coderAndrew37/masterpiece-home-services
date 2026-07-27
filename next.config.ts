@@ -1,14 +1,12 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
+    qualities: [75, 85, 90, 100], // add every quality value used anywhere in the app
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "cdn.sanity.io",
-        port: "",
-        pathname: "/images/**",
+        protocol: 'https',
+        hostname: 'cdn.sanity.io', // required for Sanity-hosted images via urlFor()
       },
     ],
   },

@@ -7,6 +7,7 @@ import { pricingPage } from './pricingPage';
 import { post } from './post';
 import { author } from './author';
 import { category } from './category';
+import { homeGalleryItem } from './homeGalleryItem';
 
 // Objects
 import { blockContent } from './blockContent';
@@ -25,7 +26,7 @@ export const schema: {types: SchemaTypeDefinition[]} = {
     post,
     author,
     category,
-
+    homeGalleryItem,
     // Objects
     blockContent,
     processStep,
@@ -38,4 +39,4 @@ export const schema: {types: SchemaTypeDefinition[]} = {
 
 // Document type names that should only ever have a single instance.
 // Used by structure.ts to pin them in the desk and hide the "create new" option.
-export const singletonTypes = new Set(['pricingPage'])
+export const singletonTypes = new Set(['pricingPage', 'homeGallery'])

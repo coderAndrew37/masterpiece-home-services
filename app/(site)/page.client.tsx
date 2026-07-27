@@ -16,6 +16,7 @@ import StatsBar from '@/components/StatsBar';
 import Testimonials from '@/components/Testimonials';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import type { PostCard } from '@/types/blog';
+import type { HomeGalleryItem } from '@/types/gallery';
 
 const homeFaqs: FAQItem[] = [
   {
@@ -47,9 +48,13 @@ const homeFaqs: FAQItem[] = [
 
 interface HomeClientProps {
   latestPosts: PostCard[];
+  galleryItems: HomeGalleryItem[];
 }
 
-export default function HomeClient({ latestPosts }: HomeClientProps): React.JSX.Element {
+export default function HomeClient({
+  latestPosts,
+  galleryItems,
+}: HomeClientProps): React.JSX.Element {
   return (
     <PageTransition>
       <Hero />
@@ -59,7 +64,7 @@ export default function HomeClient({ latestPosts }: HomeClientProps): React.JSX.
       <WhyChooseUs />
       <BeforeAfterSwiper />
       <ServiceArea />
-      <Gallery />
+      <Gallery items={galleryItems} />
       <Testimonials />
       <FAQ
         tagline="Got Questions?"

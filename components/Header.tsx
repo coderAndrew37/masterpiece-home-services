@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiPhone, FiX, FiChevronRight } from "react-icons/fi";
 import { Sparkles } from "lucide-react";
 import { phoneTel } from "@/lib/constants";
+import Image from "next/image";
 
 interface NavLink {
   name: string;
@@ -60,27 +61,35 @@ export default function Header(): React.JSX.Element {
       >
         <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="bg-blue-700 group-hover:bg-blue-800 text-white font-extrabold text-lg px-2.5 py-1.5 rounded-xl shadow-sm transition-colors flex items-center gap-1">
-              <span>MHS</span>
-            </div>
-            <div className="flex flex-col">
-              <span
-                className={`text-xl font-black tracking-tight leading-none transition-colors ${
-                  scrolled ? "text-slate-900" : "text-white md:text-slate-900 lg:text-white drop-shadow-sm"
-                }`}
-              >
-                MASTERPIECE
-              </span>
-              <span
-                className={`text-[10px] font-bold tracking-widest uppercase ${
-                  scrolled ? "text-blue-700" : "text-blue-200 md:text-blue-700 lg:text-blue-200"
-                }`}
-              >
-                Home Services
-              </span>
-            </div>
-          </Link>
+         <Link href="/" className="flex items-center gap-2.5 group">
+  {/* Logo Image replacing the text box */}
+  <div className="relative w-10 h-10 shrink-0">
+    <Image
+      src="/logo.png" // Replace with your exact filename (e.g., /logo.svg or /images/logo.png)
+      alt="Masterpiece Home Services Logo"
+      fill
+      priority
+      className="object-contain transition-transform group-hover:scale-105"
+    />
+  </div>
+
+  <div className="flex flex-col">
+    <span
+      className={`text-xl font-black tracking-tight leading-none transition-colors ${
+        scrolled ? "text-slate-900" : "text-white md:text-slate-900 lg:text-white drop-shadow-sm"
+      }`}
+    >
+      MASTERPIECE
+    </span>
+    <span
+      className={`text-[10px] font-bold tracking-widest uppercase ${
+        scrolled ? "text-blue-700" : "text-blue-200 md:text-blue-700 lg:text-blue-200"
+      }`}
+    >
+      Home Services
+    </span>
+  </div>
+</Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2">

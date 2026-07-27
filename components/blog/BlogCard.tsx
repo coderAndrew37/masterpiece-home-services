@@ -20,6 +20,11 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps): React.JSX.
     day: 'numeric',
   });
 
+  // Safely construct the image URL or fallback to a default local asset
+  const imageUrl = post.mainImage?.asset
+    ? urlFor(post.mainImage).width(700).height(450).url()
+    : '/images/residential-1.jpg';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 25 }}
@@ -30,11 +35,11 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps): React.JSX.
     >
       <Link href={`/blog/${post.slug}`} className="relative h-52 sm:h-56 w-full overflow-hidden bg-slate-900 block">
         <Image
-          src={urlFor(post.mainImage).width(700).height(450).url()}
+          src={imageUrl}
           alt={typeof post.mainImage?.alt === 'string' ? post.mainImage.alt : post.title}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+          className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
         {post.categories?.[0] && (

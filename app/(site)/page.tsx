@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { client } from '@/lib/sanity/client';
-import { latestPostsQuery } from '@/lib/sanity/queries';
+import { latestPostsQuery, homeGalleryQuery } from '@/lib/sanity/queries';
 import type { PostCard } from '@/types/blog';
+import type { HomeGalleryItem } from '@/types/gallery';
 import HomeClient from './page.client';
 
 // BASE METADATA & SEO CONFIGURATION
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/images/og-image.jpg', // Update to your real OG share image path
+        url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Masterpiece Home Services - Window and Exterior Cleaning in Kamloops BC',
@@ -72,11 +73,19 @@ export const metadata: Metadata = {
   },
 };
 
-// Revalidate periodically so new blog posts show up on the homepage without a full redeploy.
+// Revalidate periodically so new blog posts / gallery updates show up
+// on the homepage without a full redeploy.
 export const revalidate = 60;
 
+interface HomeGalleryResult {
+  items: HomeGalleryItem[];
+}
+
 export default async function HomePage() {
-  const latestPosts = await client.fetch<PostCard[]>(latestPostsQuery);
+  const [latestPosts, homeGallery] = await Promise.all([
+    client.fetch<PostCard[]>(latestPostsQuery),
+    client.fetch<HomeGalleryResult | null>(homeGalleryQuery),
+  ]);
 
   // LocalBusiness Structured Data (JSON-LD) for Google Local Pack & Maps Rankings
   const jsonLd = {
@@ -84,19 +93,13 @@ export default async function HomePage() {
     '@type': 'HomeAndConstructionBusiness',
     name: 'Masterpiece Home Services',
     url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`, // Path to your logo asset
+    logo: `${SITE_URL}/logo.png`,
     image: `${SITE_URL}/images/og-image.jpg`,
     description:
       'Professional residential and commercial window cleaning, soft wash house cleaning, eavestrough clearing, and pressure washing services in Kamloops, BC.',
     areaServed: [
-      {
-        '@type': 'City',
-        name: 'Kamloops',
-      },
-      {
-        '@type': 'AdministrativeArea',
-        name: 'Thompson-Okanagan',
-      },
+      { '@type': 'City', name: 'Kamloops' },
+      { '@type': 'AdministrativeArea', name: 'Thompson-Okanagan' },
     ],
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
@@ -137,7 +140,10 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HomeClient latestPosts={latestPosts} />
+      <HomeClient
+        latestPosts={latestPosts}
+        galleryItems={homeGallery?.items ?? []}
+      />
     </>
   );
 }
