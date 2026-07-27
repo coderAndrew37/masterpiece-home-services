@@ -7,7 +7,7 @@ import FAQ, { FAQItem } from '@/components/FAQ';
 import Gallery from '@/components/Gallery';
 import Hero from '@/components/Hero';
 import HomeProcess from '@/components/HomeProcess'; // <-- Replaced old ProcessSteps
-import LatestBlogs from '@/components/LatestBlogs';
+import LatestBlogs from '@/components/blog/LatestBlogs';
 import LeadCapture from '@/components/LeadCapture';
 import PageTransition from '@/components/PageTransition';
 import ServiceArea from '@/components/ServiceArea';
@@ -15,7 +15,7 @@ import Services from '@/components/Services';
 import StatsBar from '@/components/StatsBar';
 import Testimonials from '@/components/Testimonials';
 import WhyChooseUs from '@/components/WhyChooseUs';
-
+import type { PostCard } from '@/types/blog';
 
 const homeFaqs: FAQItem[] = [
   {
@@ -45,7 +45,11 @@ const homeFaqs: FAQItem[] = [
   },
 ];
 
-export default function HomeClient(): React.JSX.Element {
+interface HomeClientProps {
+  latestPosts: PostCard[];
+}
+
+export default function HomeClient({ latestPosts }: HomeClientProps): React.JSX.Element {
   return (
     <PageTransition>
       <Hero />
@@ -58,14 +62,14 @@ export default function HomeClient(): React.JSX.Element {
       <Gallery />
       <Testimonials />
       <FAQ
-  tagline="Got Questions?"
-  title="Frequently Asked Questions"
-  faqs={homeFaqs}
-  imageSrc="/images/residential-1.jpg" // Make sure this image exists in /public/images/
-  imageAlt="Masterpiece Home Services technician in Kamloops"
-/>
-<LeadCapture />
-<LatestBlogs />
+        tagline="Got Questions?"
+        title="Frequently Asked Questions"
+        faqs={homeFaqs}
+        imageSrc="/images/residential-1.jpg"
+        imageAlt="Masterpiece Home Services technician in Kamloops"
+      />
+      <LeadCapture />
+      <LatestBlogs posts={latestPosts} />
       <CtaBanner
         tagline="Book Service in Kamloops"
         title="Ready for Spotless Windows & Eavestroughs?"

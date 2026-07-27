@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { client } from '@/lib/sanity/client';
+import { latestPostsQuery } from '@/lib/sanity/queries';
+import type { PostCard } from '@/types/blog';
 import HomeClient from './page.client';
 
 export const metadata: Metadata = {
@@ -12,6 +15,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
-  return <HomeClient />;
+// Revalidate periodically so new blog posts show up on the homepage without a full redeploy.
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const latestPosts = await client.fetch<PostCard[]>(latestPostsQuery);
+
+  return <HomeClient latestPosts={latestPosts} />;
 }
