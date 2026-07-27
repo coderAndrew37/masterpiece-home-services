@@ -1,4 +1,5 @@
 "use client";
+import { phoneTel } from "@/lib/constants";
 import { motion } from "framer-motion";
 
 const Hero = () => {
@@ -40,7 +41,7 @@ const Hero = () => {
             className="flex flex-col sm:flex-row gap-4"
           >
             <motion.a
-              href="/contact"
+              href={phoneTel}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-full text-center font-bold drop-shadow"

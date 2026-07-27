@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     siteName: "Masterpiece Home Services",
     images: [
       {
-        url: `${SITE_URL}/og-image.jpg`,
+        url: `${SITE_URL}/images/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: "Masterpiece Home Services Exterior Cleaning in Kamloops",

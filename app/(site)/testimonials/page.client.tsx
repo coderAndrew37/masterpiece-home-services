@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import ReviewGatingModal from '@/components/ReviewGatingModal';
+import { phoneNumber, phoneTel } from '@/lib/constants';
 
 export interface Testimonial {
   id: number;
@@ -306,11 +307,11 @@ export default function TestimonialsClient({
 
               <div className="pt-6">
                 <a
-                  href="tel:2505550199"
+                  href={phoneTel}
                   className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-600 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all shadow-lg shadow-blue-700/30 active:scale-[0.98]"
                 >
                   <FiPhone className="w-4 h-4" />
-                  <span>Call Our Dispatch: (250) 555-0199</span>
+                  <span>Call Our Dispatch: {phoneNumber}</span>
                 </a>
               </div>
             </div>

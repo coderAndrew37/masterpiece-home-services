@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiPhone, FiX, FiChevronRight } from "react-icons/fi";
 import { Sparkles } from "lucide-react";
+import { phoneTel } from "@/lib/constants";
 
 interface NavLink {
   name: string;
@@ -202,14 +203,14 @@ export default function Header(): React.JSX.Element {
                   <span>Serving Kamloops & Okanagan Region</span>
                 </div>
 
-                <Link
-                  href="/contact"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-700/20 flex items-center justify-center gap-2 transition-all"
-                >
-                  <FiPhone className="w-4 h-4" />
-                  <span>Request Free Quote</span>
-                </Link>
+                <a
+  href={phoneTel}
+  onClick={() => setIsOpen(false)}
+  className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-700/20 flex items-center justify-center gap-2 transition-all"
+>
+  <FiPhone className="w-4 h-4" />
+  <span>Request Free Quote</span>
+</a>
               </div>
             </motion.aside>
           </>

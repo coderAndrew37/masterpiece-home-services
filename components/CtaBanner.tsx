@@ -1,8 +1,8 @@
 "use client";
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { phoneTel } from "@/lib/constants";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import React from "react";
 
 interface CtaBannerProps {
   title: string;
@@ -58,12 +58,12 @@ const CtaBanner: React.FC<CtaBannerProps> = ({
                 whileTap={{ scale: 0.97 }}
                 className="inline-block"
               >
-                <Link
-                  href="/contact"
+                <a
+                  href={phoneTel}
                   className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-xl transition-colors duration-200 inline-flex items-center justify-center shadow-lg shadow-blue-700/20"
                 >
                   {buttonText}
-                </Link>
+                </a>
               </motion.div>
             </div>
           </motion.div>

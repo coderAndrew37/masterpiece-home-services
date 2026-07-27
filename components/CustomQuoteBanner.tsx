@@ -1,5 +1,6 @@
 "use client";
 
+import { phoneNumber, phoneTel } from "@/lib/constants";
 import React, { useState } from "react";
 import { FiArrowRight, FiHelpCircle, FiPhoneCall, FiSend } from "react-icons/fi";
 import { toast } from "sonner";
@@ -58,11 +59,11 @@ export default function CustomQuoteBanner(): React.JSX.Element {
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               {/* Direct Call Button */}
               <a
-                href="tel:2505550199"
+                href={phoneTel}
                 className="inline-flex items-center justify-center gap-3 bg-blue-700 hover:bg-blue-600 text-white font-extrabold px-7 py-4 rounded-2xl text-base transition-all shadow-lg shadow-blue-700/30 active:scale-[0.98]"
               >
                 <FiPhoneCall className="w-5 h-5 animate-bounce" />
-                <span>Call Directly: (250) 555-0199</span>
+                <span>Call Directly: {phoneNumber}</span>
               </a>
 
               {/* Request Custom Call Back Toggle */}

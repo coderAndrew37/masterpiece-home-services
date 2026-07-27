@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FiMail, FiPhone, FiMapPin, FiClock, FiAlertCircle } from "react-icons/fi";
+import { phoneNumber, phoneTel } from "@/lib/constants";
 
 export default function ContactInfo(): React.JSX.Element {
   return (
@@ -29,10 +30,10 @@ export default function ContactInfo(): React.JSX.Element {
                 Phone & Direct Line
               </h4>
               <a
-                href="tel:2505550199"
+                href={phoneTel}
                 className="text-lg font-bold text-white hover:text-blue-400 transition-colors"
               >
-                (250) 555-0199
+                {phoneNumber}
               </a>
             </div>
           </div>
@@ -101,10 +102,10 @@ export default function ContactInfo(): React.JSX.Element {
           Need immediate post-storm clearance or same-week listing prep? Give our team a direct call.
         </p>
         <a
-          href="tel:2505550199"
+          href={phoneTel}
           className="inline-flex items-center justify-center bg-blue-700 hover:bg-blue-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all shadow-md"
         >
-          Call Dispatch: (250) 555-0199
+          Call Dispatch: {phoneNumber}
         </a>
       </div>
     </motion.div>

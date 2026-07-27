@@ -11,6 +11,7 @@ import {
   FiMapPin,
   FiPhone,
 } from "react-icons/fi";
+import { phoneNumber, phoneTel } from "@/lib/constants";
 
 interface FooterLink {
   name: string;
@@ -75,8 +76,8 @@ export default function Footer(): React.JSX.Element {
               </div>
               <div className="flex items-center gap-2.5">
                 <FiPhone className="text-blue-400 shrink-0" />
-                <a href="tel:2505550199" className="hover:text-blue-400 transition-colors">
-                  (250) 555-0199
+                <a href={phoneTel} className="hover:text-blue-400 transition-colors">
+                {phoneNumber}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">

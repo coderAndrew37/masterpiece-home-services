@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiStar, FiPhone } from 'react-icons/fi';
+import { phoneNumber, phoneTel } from '@/lib/constants';
 
 export default function ServiceArea(): React.JSX.Element {
   return (
@@ -63,11 +64,11 @@ export default function ServiceArea(): React.JSX.Element {
               </Link>
               
               <a
-                href="tel:2505550199"
+                href={phoneTel}
                 className="px-6 py-3.5 border-2 border-blue-600 hover:bg-blue-600/20 text-white font-bold rounded-xl transition-all duration-200 inline-flex items-center gap-2 text-sm sm:text-base"
               >
                 <FiPhone className="w-4 h-4 text-blue-400" />
-                <span>(250) 555-0199</span>
+                <span>{phoneNumber}</span>
               </a>
             </div>
           </motion.div>
