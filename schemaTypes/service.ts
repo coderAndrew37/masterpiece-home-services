@@ -1,17 +1,7 @@
+// sanity/schemas/service.ts
 import {defineField, defineType} from 'sanity'
 import {WrenchIcon} from '@sanity/icons/Wrench'
 
-/**
- * Single source of truth for both:
- *  - ServiceItem (used on /services list page + homepage ServicePlatforms cards)
- *  - DetailedService (used on /services/[slug] detail page)
- *
- * Field name notes vs your current TS interfaces:
- *  - ServiceItem.image        -> cardImage
- *  - ServiceItem.shortDesc    -> shortDescription
- *  - DetailedService.heroImage-> heroImage (falls back to cardImage in the frontend if empty)
- *  - DetailedService.description (string[]) -> description (blockContent, richer + easier to edit)
- */
 export const service = defineType({
   name: 'service',
   title: 'Service',
@@ -24,12 +14,10 @@ export const service = defineType({
     {name: 'seo', title: 'SEO'},
   ],
   fields: [
-    // --- Core identity ---
     defineField({
       name: 'title',
       title: 'Title',
       type: 'string',
-      description: 'e.g. "Pure-Water Window Detailing"',
       validation: (Rule) => Rule.required(),
       group: ['listing', 'detail'],
     }),
@@ -50,17 +38,31 @@ export const service = defineType({
       group: 'listing',
     }),
     defineField({
+      name: 'featuredOnHome',
+      title: 'Show on Homepage',
+      type: 'boolean',
+      description: 'Only the first 4 (by Display Order) featured services show on the homepage cards.',
+      initialValue: false,
+      group: 'listing',
+    }),
+    defineField({
+      name: 'homeSubtitle',
+      title: 'Homepage Card Subtitle',
+      type: 'string',
+      description: 'Short line for the homepage card. Falls back to Short Description if empty.',
+      group: 'listing',
+    }),
+    defineField({
       name: 'badge',
       title: 'Badge',
       type: 'string',
-      description: 'Optional flag shown on the card and detail hero, e.g. "Most Popular", "New Service".',
+      description: 'e.g. "Most Popular", "New Service", "Seasonal"',
       group: ['listing', 'detail'],
     }),
     defineField({
       name: 'icon',
       title: 'Icon',
       type: 'string',
-      description: 'Icon shown on the service card.',
       options: {
         list: [
           {title: 'Home', value: 'FiHome'},
@@ -76,8 +78,6 @@ export const service = defineType({
       validation: (Rule) => Rule.required(),
       group: 'listing',
     }),
-
-    // --- Listing / card fields ---
     defineField({
       name: 'cardImage',
       title: 'Card Image',
@@ -92,7 +92,6 @@ export const service = defineType({
       title: 'Short Description',
       type: 'text',
       rows: 3,
-      description: 'One or two sentences shown on the services grid card.',
       validation: (Rule) => Rule.required().max(200),
       group: 'listing',
     }),
@@ -101,12 +100,9 @@ export const service = defineType({
       title: 'Card Features',
       type: 'array',
       of: [{type: 'string'}],
-      description: 'Short checklist bullets shown on the card (3-5 items).',
       validation: (Rule) => Rule.max(6),
       group: 'listing',
     }),
-
-    // --- Detail page fields ---
     defineField({
       name: 'subtitle',
       title: 'Subtitle',
@@ -121,7 +117,7 @@ export const service = defineType({
       type: 'image',
       options: {hotspot: true},
       fields: [{name: 'alt', title: 'Alternative Text', type: 'string'}],
-      description: 'Used as the detail page hero background. Falls back to Card Image if left empty.',
+      description: 'Falls back to Card Image if left empty.',
       group: 'detail',
     }),
     defineField({
@@ -136,7 +132,6 @@ export const service = defineType({
       name: 'description',
       title: 'Service Overview',
       type: 'blockContent',
-      description: 'Rich text overview shown in the "Service Overview" block on the detail page.',
       group: 'detail',
     }),
     defineField({
@@ -167,24 +162,18 @@ export const service = defineType({
       of: [{type: 'faq'}],
       group: 'detail',
     }),
-
-    // --- Gallery ---
     defineField({
       name: 'gallery',
       title: 'Gallery',
       type: 'array',
       of: [{type: 'galleryImage'}],
-      description: 'Additional photos for this specific service (before/after, job site shots, etc.), shown on the detail page.',
       options: {layout: 'grid'},
       group: 'gallery',
     }),
-
-    // --- SEO ---
     defineField({
       name: 'seoTitle',
       title: 'SEO Title',
       type: 'string',
-      description: 'Overrides the auto-generated <title>. Leave blank to use the default pattern.',
       group: 'seo',
     }),
     defineField({
@@ -192,36 +181,18 @@ export const service = defineType({
       title: 'SEO Description',
       type: 'text',
       rows: 2,
-      description: 'Overrides the meta description. Leave blank to fall back to the subtitle.',
       validation: (Rule) => Rule.max(160),
       group: 'seo',
     }),
   ],
   preview: {
-    select: {
-      title: 'title',
-      subtitle: 'shortDescription',
-      media: 'cardImage',
-      badge: 'badge',
-    },
+    select: {title: 'title', subtitle: 'shortDescription', media: 'cardImage', badge: 'badge'},
     prepare({title, subtitle, media, badge}) {
-      return {
-        title: badge ? `${title} · ${badge}` : title,
-        subtitle,
-        media,
-      }
+      return {title: badge ? `${title} · ${badge}` : title, subtitle, media}
     },
   },
   orderings: [
-    {
-      title: 'Display Order',
-      name: 'orderAsc',
-      by: [{field: 'order', direction: 'asc'}],
-    },
-    {
-      title: 'Title A-Z',
-      name: 'titleAsc',
-      by: [{field: 'title', direction: 'asc'}],
-    },
+    {title: 'Display Order', name: 'orderAsc', by: [{field: 'order', direction: 'asc'}]},
+    {title: 'Title A-Z', name: 'titleAsc', by: [{field: 'title', direction: 'asc'}]},
   ],
 })

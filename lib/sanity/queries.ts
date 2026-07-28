@@ -65,3 +65,24 @@ export const homeGalleryQuery = groq`
     alt
   }
 `;
+
+export const allServicesQuery = /* groq */ `
+*[_type == "service"] | order(order asc) {
+  _id, title, "slug": slug.current, cardImage, shortDescription,
+  features, icon, badge, startingPrice, featuredOnHome, homeSubtitle
+}`;
+
+export const serviceBySlugQuery = /* groq */ `
+*[_type == "service" && slug.current == $slug][0] {
+  _id, title, "slug": slug.current, subtitle,
+  heroImage, cardImage, icon, badge, startingPrice, description,
+  whatsIncluded, benefits, processSteps, faqs
+}`;
+
+export const serviceSlugsQuery = /* groq */ `*[_type == "service"].slug.current`;
+
+export const pricingPageQuery = /* groq */ `
+*[_type == "pricingPage"][0]{
+  heroTagline, heroTitle, heroDescription,
+  residentialPricing, commercialPricing, addons, faqs
+}`;

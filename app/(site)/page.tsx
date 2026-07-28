@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { client } from '@/lib/sanity/client';
-import { latestPostsQuery, homeGalleryQuery } from '@/lib/sanity/queries';
+import { latestPostsQuery, homeGalleryQuery, allServicesQuery } from '@/lib/sanity/queries';
 import type { PostCard } from '@/types/blog';
 import type { HomeGalleryItem } from '@/types/gallery';
 import HomeClient from './page.client';
+import { ServiceItem } from '@/types/service';
 
 // BASE METADATA & SEO CONFIGURATION
 const SITE_URL = 'https://www.masterpiecehomeservices.ca';
@@ -78,10 +79,13 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [latestPosts, galleryItems] = await Promise.all([
+ const [latestPosts, galleryItems, services] = await Promise.all([
     client.fetch<PostCard[]>(latestPostsQuery),
     client.fetch<HomeGalleryItem[]>(homeGalleryQuery),
+    client.fetch<ServiceItem[]>(allServicesQuery),
   ]);
+
+  const featuredServices = services.filter((s) => s.featuredOnHome).slice(0, 4);
 
   // LocalBusiness Structured Data (JSON-LD) for Google Local Pack & Maps Rankings
   const jsonLd = {
@@ -137,9 +141,8 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <HomeClient
-        latestPosts={latestPosts}
-        galleryItems={galleryItems ?? []}
-      />
+         latestPosts={latestPosts} galleryItems={galleryItems ?? []} featuredServices={featuredServices} />
+ 
     </>
   );
 }

@@ -1,3 +1,4 @@
+// src/app/services/page.client.tsx
 'use client';
 
 import CtaBanner from '@/components/CtaBanner';
@@ -10,23 +11,17 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React from 'react';
 import { FiGrid } from 'react-icons/fi';
-import { PricingOption} from './page';
-import { ServiceItem } from '@/types';
+import Link from 'next/link';
+import type { ServiceItem } from '@/types/service';
 
 interface ServicesClientProps {
   services: ServiceItem[];
   benefits: string[];
-  pricing: PricingOption[];
 }
 
-export default function ServicesClient({
-  services,
-  benefits,
-  pricing,
-}: ServicesClientProps): React.JSX.Element {
+export default function ServicesClient({ services, benefits }: ServicesClientProps): React.JSX.Element {
   return (
     <PageTransition>
-      {/* 1. Hero Header */}
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
@@ -64,7 +59,6 @@ export default function ServicesClient({
         </div>
       </section>
 
-      {/* 2. Main Services Grid */}
       <section className="py-20 bg-slate-50">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center max-w-2xl mx-auto mb-14">
@@ -81,27 +75,30 @@ export default function ServicesClient({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {services.map((service) => (
-              <ServiceDetail key={service.id} service={service} />
+              <ServiceDetail key={service._id} service={service} />
             ))}
           </div>
 
-          {/* 3. Custom Project / Need Something Unique Banner */}
           <CustomQuoteBanner />
 
-          {/* 4. Why Professional Care Matters */}
-          <ServiceBenefits
-            title="Why Kamloops Homeowners Choose Masterpiece"
-            benefits={benefits}
-          />
+          <ServiceBenefits title="Why Kamloops Homeowners Choose Masterpiece" benefits={benefits} />
 
-          {/* 5. Transparent Pricing Table */}
           <PricingTable
             title="Standard Service Rates"
-            description="Clear baseline pricing with zero hidden fees. Includes all equipment, labor, and eco-safe products."
-            pricingOptions={pricing}
+            description="Clear baseline pricing with zero hidden fees. See full plans and bundles on our Pricing page."
+            pricingOptions={services.map((s) => ({
+              service: s.title,
+              details: s.shortDescription,
+              price: s.startingPrice,
+            }))}
           />
 
-          {/* 6. CTA Banner */}
+          <div className="text-center -mt-8 mb-16">
+            <Link href="/pricing" className="text-sm font-bold text-blue-700 hover:underline">
+              View full pricing plans & bundles →
+            </Link>
+          </div>
+
           <CtaBanner
             tagline="Kamloops & Surrounding Areas"
             title="Ready to Schedule Your Service?"
