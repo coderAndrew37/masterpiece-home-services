@@ -5,6 +5,8 @@ import { Toaster } from "sonner";
 import CookieConsent from "@/components/CookieConsent";
 import LeadModal from "@/components/LeadModal";
 import Newsletter from "@/components/Newsletter";
+import QuoteModal from "@/components/QuoteModal";
+import { QuoteModalProvider } from "@/components/QuoteModalProvider";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://masterpiecehomeservices.ca";
 
@@ -125,8 +127,8 @@ export default function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
+ return (
+    <QuoteModalProvider>
       {/*
         Only the root layout owns <head> directly. A <script> tag rendered
         here (inside <body>) is still valid for JSON-LD — search engines
@@ -143,8 +145,9 @@ export default function SiteLayout({
       <Footer />
 
       <CookieConsent />
+      <QuoteModal />
       <LeadModal />
       <Toaster position="top-right" richColors closeButton />
-    </>
+    </QuoteModalProvider>
   );
 }
