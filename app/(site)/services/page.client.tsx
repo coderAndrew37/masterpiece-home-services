@@ -20,6 +20,8 @@ interface ServicesClientProps {
 }
 
 export default function ServicesClient({ services, benefits }: ServicesClientProps): React.JSX.Element {
+  
+
   return (
     <PageTransition>
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
@@ -88,8 +90,8 @@ export default function ServicesClient({ services, benefits }: ServicesClientPro
             description="Clear baseline pricing with zero hidden fees. See full plans and bundles on our Pricing page."
             pricingOptions={services.map((s) => ({
               service: s.title,
-              details: s.shortDescription,
-              price: s.startingPrice,
+              details: s.shortDescription ?? 'Service details available upon request.',
+              price: s.startingPrice ?? 'Custom quote',
             }))}
           />
 

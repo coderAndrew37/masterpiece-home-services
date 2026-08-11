@@ -1,6 +1,9 @@
-import { ServiceItem } from '@/types';
+// src/app/services/page.tsx
 import ServicesClient from './page.client';
 import type { Metadata } from 'next';
+import type { ServiceItem } from '@/types/service';
+import { client } from '@/lib/sanity/client';
+import { allServicesQuery } from '@/lib/sanity/queries';
 
 export const metadata: Metadata = {
   title: 'All Property Services | Masterpiece Home Services Kamloops',
@@ -13,120 +16,100 @@ export const metadata: Metadata = {
   },
 };
 
-
-export interface PricingOption {
-  service: string;
-  details: string;
-  price: string;
-}
-
-export default function ServicesPage() {
-  const services: ServiceItem[] = [
+const fallbackServices: ServiceItem[] = [
   {
-    id: 1,
-    slug: 'window-cleaning',
+    _id: '1',
     title: 'Pure-Water Window Detailing',
-    image: '/images/residential-1.jpg',
-    shortDesc: 'Streak-free interior and exterior glass cleaning using pure deionized water systems.',
-    features: ['Pure deionized water technology', 'Interior & exterior glass detailing', 'Sills, tracks & frame wipes included', 'Screen washing included'],
+    slug: 'window-cleaning',
+    shortDescription: 'Streak-free interior and exterior glass cleaning using pure deionized water systems.',
+    startingPrice: '$199',
+    cardImage: { _type: 'image', asset: { _ref: '', _type: 'reference' } },
+    features: ['Pure deionized water', 'Interior & exterior detailing', 'Screen washing'],
     icon: 'FiHome',
     badge: 'Most Popular',
+    featuredOnHome: true,
   },
   {
-    id: 2,
-    slug: 'eavestroughs',
+    _id: '2',
     title: 'Eavestrough & Gutter Clearing',
-image: '/images/residential-1.jpg',
-    shortDesc: 'Prevent water damage and foundation erosion with complete gutter debris removal.',
-    features: ['Hand-clearing pine needles & debris', 'Full high-pressure downspout flush', 'Gutter exterior face soft scrub', 'Pre-winter ice dam protection'],
+    slug: 'eavestroughs',
+    shortDescription: 'Prevent water damage and foundation erosion with complete gutter debris removal.',
+    startingPrice: '$169',
+    cardImage: { _type: 'image', asset: { _ref: '', _type: 'reference' } },
+    features: ['Debris removal', 'Downspout flush', 'Pre-winter check'],
     icon: 'FiDroplet',
+    featuredOnHome: true,
   },
   {
-    id: 3,
-    slug: 'soft-washing',
+    _id: '3',
     title: 'House Soft Washing',
-   image: '/images/residential-1.jpg',
-    shortDesc: 'Safe, low-pressure exterior washing that eliminates algae, moss, and dirt from siding.',
-    features: ['Eco-friendly biodegradable detergent', 'Low-pressure zero-damage application', 'Algae, mold & mildew elimination', 'Protects paint & siding warranties'],
+    slug: 'soft-washing',
+    shortDescription: 'Safe, low-pressure exterior washing that eliminates algae, moss, and dirt from siding.',
+    startingPrice: '$249',
+    cardImage: { _type: 'image', asset: { _ref: '', _type: 'reference' } },
+    features: ['Low-pressure wash', 'Biodegradable cleaner', 'Siding protection'],
     icon: 'FiSun',
+    featuredOnHome: true,
   },
   {
-    id: 4,
-    slug: 'pressure-washing',
+    _id: '4',
     title: 'Pressure & Surface Washing',
-  image: '/images/residential-1.jpg',
-    shortDesc: 'High-volume surface cleaning to restore driveways, walkways, patios, and decks.',
-    features: ['Heavy oil & dirt stain lifting', 'Concrete driveway rotary scrubbing', 'Patio & composite deck detailing', 'Slip-hazard moss removal'],
+    slug: 'pressure-washing',
+    shortDescription: 'High-volume surface cleaning to restore driveways, walkways, patios, and decks.',
+    startingPrice: '$149',
+    cardImage: { _type: 'image', asset: { _ref: '', _type: 'reference' } },
+    features: ['Driveway scrubbing', 'Oil stain removal', 'Moss removal'],
     icon: 'FiZap',
+    featuredOnHome: false,
   },
   {
-    id: 5,
-    slug: 'indoor-cleaning',
+    _id: '5',
     title: 'Indoor House Cleaning',
-    image: '/images/residential-1.jpg',
-    shortDesc: 'Comprehensive interior housekeeping, deep cleaning, and move-in/move-out detailing.',
-    features: ['Kitchen & bathroom deep sanitization', 'Whole-home floor vacuuming & mopping', 'Dusting, baseboards & interior glass', 'Custom recurring care schedules'],
+    slug: 'indoor-cleaning',
+    shortDescription: 'Comprehensive interior housekeeping, deep cleaning, and move-in/move-out detailing.',
+    startingPrice: '$219',
+    cardImage: { _type: 'image', asset: { _ref: '', _type: 'reference' } },
+    features: ['Deep sanitization', 'Vacuuming & mopping', 'Baseboard dusting'],
     icon: 'FiShield',
     badge: 'New Service',
+    featuredOnHome: false,
   },
   {
-    id: 6,
-    slug: 'christmas-lights',
+    _id: '6',
     title: 'Christmas Lights Installation',
-image: '/images/residential-1.jpg',
-    shortDesc: 'Turnkey holiday lighting: commercial-grade LED supply, safe hanging, and takedown.',
-    features: ['Custom-fit commercial LED strands', 'Zero-damage gutter/shingle clips', 'In-season replacement guarantee', 'Post-holiday removal & box storage'],
+    slug: 'christmas-lights',
+    shortDescription: 'Turnkey holiday lighting: commercial-grade LED supply, safe hanging, and takedown.',
+    startingPrice: 'from $299',
+    cardImage: { _type: 'image', asset: { _ref: '', _type: 'reference' } },
+    features: ['Commercial LEDs', 'Zero-damage clips', 'Takedown & storage'],
     icon: 'FiCalendar',
     badge: 'Winter Special',
+    featuredOnHome: false,
   },
 ];
 
-  const benefits = [
-    'Restores and protects your property value & curb appeal',
-    'Prevents costly water damage, rot, and glass degradation',
-    'Fully insured ($5M liability) and WorkSafeBC covered crew',
-    'Eco-friendly, child & pet-safe cleaning solutions',
-    'Convenient 24-hour fast quotes and simple online booking',
-  ];
+const benefits = [
+  'Restores and protects your property value & curb appeal',
+  'Prevents costly water damage, rot, and glass degradation',
+  'Fully insured ($5M liability) and WorkSafeBC covered crew',
+  'Eco-friendly, child & pet-safe cleaning solutions',
+  'Convenient 24-hour fast quotes and simple online booking',
+];
 
-  const pricing: PricingOption[] = [
-    {
-      service: 'Residential Window Detailing',
-      details: 'Interior & exterior (Up to 25 windows)',
-      price: '$199',
-    },
-    {
-      service: 'Full Eavestrough & Downspout Flush',
-      details: 'Standard 2-story home',
-      price: '$169',
-    },
-    {
-      service: 'House Soft Wash (Siding & Trim)',
-      details: 'Up to 2,500 sq. ft. home',
-      price: '$249',
-    },
-    {
-      service: 'Concrete Driveway Surface Wash',
-      details: 'Standard 2-car driveway',
-      price: '$149',
-    },
-    {
-      service: 'Indoor House Deep Clean',
-      details: '3 Bedroom / 2 Bath home',
-      price: '$219',
-    },
-    {
-      service: 'Custom Christmas Light Installation',
-      details: 'Design, install, removal & storage',
-      price: 'from $299',
-    },
-  ];
+export default async function ServicesPage() {
+  let services: ServiceItem[] = [];
 
-  return (
-    <ServicesClient
-      services={services}
-      benefits={benefits}
-      pricing={pricing}
-    />
-  );
+  try {
+    const fetchedServices = await client.fetch<ServiceItem[]>(allServicesQuery);
+    if (fetchedServices && fetchedServices.length > 0) {
+      services = fetchedServices;
+    } else {
+      services = fallbackServices;
+    }
+  } catch (error) {
+    console.error('Failed to fetch services from Sanity, falling back to static array:', error);
+    services = fallbackServices;
+  }
+
+  return <ServicesClient services={services} benefits={benefits} />;
 }
