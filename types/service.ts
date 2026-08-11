@@ -22,11 +22,14 @@ export interface ServiceItem {
   homeSubtitle?: string;
 }
 
+// src/types/service.ts — DetailedService, replace metaDescription with:
 export interface DetailedService {
   _id: string;
   slug: string;
   title: string;
   subtitle: string;
+  seoTitle?: string;
+  seoDescription?: string;
   heroImage?: SanityImageRef;
   cardImage?: SanityImageRef;
   icon: string;

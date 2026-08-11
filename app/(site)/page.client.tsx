@@ -25,6 +25,7 @@ interface HomeClientProps {
   galleryItems: HomeGalleryItem[];
   featuredServices: ServiceItem[];
   faqs: FAQItem[];
+   serviceAreas: { _id: string; name: string; slug: string }[];
 }
 
 export default function HomeClient({
@@ -32,6 +33,7 @@ export default function HomeClient({
   galleryItems,
   featuredServices,
   faqs,
+  serviceAreas,
 }: HomeClientProps): React.JSX.Element {
   return (
     <PageTransition>
@@ -41,7 +43,7 @@ export default function HomeClient({
       <HomeProcess />
       <WhyChooseUs />
       <BeforeAfterSwiper />
-      <ServiceArea />
+         <ServiceArea areas={serviceAreas} />
       <Gallery items={galleryItems} />
       <Testimonials />
       <FAQ

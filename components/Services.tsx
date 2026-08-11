@@ -94,6 +94,7 @@ export default function ServicePlatforms({ services }: ServicePlatformsProps): R
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                     priority={index < 2}
+                    unoptimized
                   />
 
                   {/* Dark Vignette Overlay */}

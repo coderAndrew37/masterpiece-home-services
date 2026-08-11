@@ -20,8 +20,6 @@ interface ServicesClientProps {
 }
 
 export default function ServicesClient({ services, benefits }: ServicesClientProps): React.JSX.Element {
-  
-
   return (
     <PageTransition>
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">

@@ -20,8 +20,11 @@ import {
   FiShield,
   FiClock,
   FiAward,
+  FiChevronRight,
 } from 'react-icons/fi';
 import { phoneNumber, phoneTel } from '@/lib/constants';
+
+const SITE_URL = 'https://www.masterpiecehomeservices.ca';
 
 // Helper function to safely extract image URLs across SSR/metadata and page components
 const getImageUrl = (imageSource: unknown, fallbackUrl = '/images/residential-1.jpg'): string => {
@@ -54,14 +57,39 @@ export async function generateMetadata({
   const ogImageUrl = heroImg
     ? urlFor(heroImg).width(1200).height(630).auto('format').url()
     : '/images/residential-1.jpg';
+const canonicalUrl = `${SITE_URL}/services/${slug}`;
+const description = service.seoDescription ?? service.subtitle;
+const title = service.seoTitle ?? `${service.title} Kamloops | Masterpiece Home Services`;
+
 
   return {
-    title: `${service.title} Kamloops | Masterpiece Home Services`,
-    description: service.subtitle,
+    title: title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title: `${service.title} | Masterpiece Kamloops`,
-      description: service.subtitle,
-      images: [{ url: ogImageUrl }],
+      description,
+      url: canonicalUrl,
+      type: 'website',
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: service.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${service.title} | Masterpiece Kamloops`,
+      description,
+      images: [ogImageUrl],
     },
   };
 }
@@ -70,7 +98,7 @@ export default async function ServiceDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
-}) {
+}): Promise<React.JSX.Element> {
   const { slug } = await params;
   const service = await client.fetch<DetailedService | null>(serviceBySlugQuery, { slug });
 
@@ -79,9 +107,71 @@ export default async function ServiceDetailPage({
   const heroImg = service.heroImage ?? service.cardImage;
   const heroImageUrl = getImageUrl(heroImg);
   const heroAltText = (heroImg as { alt?: string })?.alt || service.title || 'Service hero image';
+  const pageUrl = `${SITE_URL}/services/${slug}`;
+  const servicesUrl = `${SITE_URL}/services`;
+
+  // Service schema — references the homepage org node by @id rather than
+  // repeating the full business object (see src/app/page.tsx)
+  const serviceJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${pageUrl}#service`,
+    serviceType: service.title,
+    name: service.title,
+    description: service.subtitle,
+    url: pageUrl,
+    provider: { '@id': `${SITE_URL}/#organization` },
+    areaServed: { '@type': 'City', name: 'Kamloops' },
+    ...(service.startingPrice && {
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'CAD',
+        price: service.startingPrice.replace(/[^0-9.]/g, ''),
+        url: pageUrl,
+      },
+    }),
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Services', item: servicesUrl },
+      { '@type': 'ListItem', position: 3, name: service.title, item: pageUrl },
+    ],
+  };
+
+  const faqJsonLd =
+    service.faqs && service.faqs.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: service.faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+          })),
+        }
+      : null;
 
   return (
     <PageTransition>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
+
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
@@ -91,22 +181,39 @@ export default async function ServiceDetailPage({
             priority
             sizes="100vw"
             className="object-cover object-center opacity-30 scale-105"
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
         </div>
 
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-4">
-              <Link href="/services" className="text-xs font-bold text-blue-400 hover:underline uppercase tracking-wider">
-                ← All Services
-              </Link>
-              {service.badge && (
-                <span className="bg-blue-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                  {service.badge}
-                </span>
-              )}
-            </div>
+            {/* Visible breadcrumb — mirrors the BreadcrumbList schema above */}
+            <nav aria-label="Breadcrumb" className="mb-4">
+              <ol className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <li>
+                  <Link href="/" className="hover:text-blue-400 transition-colors">
+                    Home
+                  </Link>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <FiChevronRight className="w-3 h-3" />
+                  <Link href="/services" className="hover:text-blue-400 transition-colors">
+                    Services
+                  </Link>
+                </li>
+                <li className="flex items-center gap-1.5 text-blue-400">
+                  <FiChevronRight className="w-3 h-3" />
+                  <span aria-current="page">{service.title}</span>
+                </li>
+              </ol>
+            </nav>
+
+            {service.badge && (
+              <span className="inline-block bg-blue-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+                {service.badge}
+              </span>
+            )}
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight mb-4 leading-tight">
               {service.title}
@@ -123,7 +230,7 @@ export default async function ServiceDetailPage({
                 <FiArrowRight className="w-4 h-4" />
               </a>
 
-              <a
+<a              
                 href={phoneTel}
                 className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 font-bold px-6 py-4 rounded-2xl text-sm transition-all"
               >
@@ -157,9 +264,9 @@ export default async function ServiceDetailPage({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {service.whatsIncluded && service.whatsIncluded.length > 0 && (
                   <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm">
-                    <h3 className="text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                    <h2 className="text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
                       <FiShield className="text-blue-600 w-5 h-5" /> What&apos;s Included
-                    </h3>
+                    </h2>
                     <ul className="space-y-3">
                       {service.whatsIncluded.map((item, idx) => (
                         <li key={idx} className="flex items-start text-xs sm:text-sm font-semibold text-slate-700">
@@ -173,9 +280,9 @@ export default async function ServiceDetailPage({
 
                 {service.benefits && service.benefits.length > 0 && (
                   <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm">
-                    <h3 className="text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                    <h2 className="text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
                       <FiAward className="text-blue-600 w-5 h-5" /> Key Benefits
-                    </h3>
+                    </h2>
                     <ul className="space-y-3">
                       {service.benefits.map((item, idx) => (
                         <li key={idx} className="flex items-start text-xs sm:text-sm font-semibold text-slate-700">
@@ -204,7 +311,7 @@ export default async function ServiceDetailPage({
                           {idx + 1}
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-900 text-base mb-1">{step.title}</h4>
+                          <h3 className="font-bold text-slate-900 text-base mb-1">{step.title}</h3>
                           <p className="text-slate-600 text-sm leading-relaxed">{step.desc}</p>
                         </div>
                       </div>
@@ -236,7 +343,7 @@ export default async function ServiceDetailPage({
                   <span className="text-xs font-bold text-blue-400 uppercase tracking-widest block mb-1">
                     Fast & Simple
                   </span>
-                  <h3 className="text-2xl font-black text-white">Book This Service</h3>
+                  <h2 className="text-2xl font-black text-white">Book This Service</h2>
                   <p className="text-slate-400 text-xs mt-2 leading-relaxed">
                     Get your property serviced by Kamloops&apos; highest-rated technicians.
                   </p>
@@ -284,7 +391,7 @@ export default async function ServiceDetailPage({
       <CtaBanner
         tagline="Kamloops & Surrounding Areas"
         title={`Ready to Book ${service.title}?`}
-        description="Our team provides streak-free window wash, soft washing, eavestrough care, and Christmas light setups across Kamloops."
+        description={`Get a fast, no-obligation quote for ${service.title.toLowerCase()} in Kamloops. Our insured, WorkSafeBC-covered crew delivers your estimate within 24 hours.`}
         buttonText="Get Free Quote"
       />
     </PageTransition>

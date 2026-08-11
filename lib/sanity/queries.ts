@@ -68,14 +68,24 @@ export const homeGalleryQuery = groq`
 
 export const allServicesQuery = /* groq */ `
 *[_type == "service"] | order(order asc) {
-  _id, title, "slug": slug.current, cardImage, shortDescription,
-  features, icon, badge, startingPrice, featuredOnHome, homeSubtitle
+  _id, 
+  title, 
+  "slug": slug.current, 
+  "cardImage": cardImage.asset->url,
+  "cardImageAlt": cardImage.alt,
+  shortDescription,
+  features, 
+  icon, 
+  badge, 
+  startingPrice, 
+  featuredOnHome, 
+  homeSubtitle
 }`;
 
 export const serviceBySlugQuery = /* groq */ `
 *[_type == "service" && slug.current == $slug][0] {
-  _id, title, "slug": slug.current, subtitle,
-  heroImage, cardImage, icon, badge, startingPrice, description,
+  _id, title, "slug": slug.current, subtitle, seoTitle, seoDescription,
+  heroImage, "cardImage": cardImage.asset->url, icon, badge, startingPrice, description,
   whatsIncluded, benefits, processSteps, faqs
 }`;
 
@@ -86,3 +96,22 @@ export const pricingPageQuery = /* groq */ `
   heroTagline, heroTitle, heroDescription,
   residentialPricing, commercialPricing, addons, faqs
 }`;
+
+export const serviceAreasQuery = /* groq */ `
+*[_type == "serviceArea" && published == true] | order(order asc) {
+  _id, name, "slug": slug.current, intro, heroImage
+}`;
+
+export const serviceAreaBySlugQuery = /* groq */ `
+*[_type == "serviceArea" && slug.current == $slug && published == true][0] {
+  _id, name, "slug": slug.current, region, intro, localHook, heroImage,
+  seoTitle, seoDescription,
+  relatedServices[]{
+    blurb,
+    "service": service->{ title, "slug": slug.current, icon }
+  }
+}`;
+
+export const serviceAreaSlugsQuery = /* groq */ `
+*[_type == "serviceArea" && published == true].slug.current
+`;

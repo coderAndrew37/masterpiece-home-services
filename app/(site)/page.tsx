@@ -1,7 +1,7 @@
 // src/app/page.tsx
 import type { Metadata } from 'next';
 import { client } from '@/lib/sanity/client';
-import { latestPostsQuery, homeGalleryQuery, allServicesQuery } from '@/lib/sanity/queries';
+import { latestPostsQuery, homeGalleryQuery, allServicesQuery, serviceAreasQuery } from '@/lib/sanity/queries';
 import type { PostCard } from '@/types/blog';
 import type { HomeGalleryItem } from '@/types/gallery';
 import HomeClient from './page.client';
@@ -72,11 +72,12 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function HomePage(): Promise<React.JSX.Element> {
-  const [latestPosts, galleryItems, services] = await Promise.all([
-    client.fetch<PostCard[]>(latestPostsQuery),
-    client.fetch<HomeGalleryItem[]>(homeGalleryQuery),
-    client.fetch<ServiceItem[]>(allServicesQuery),
-  ]);
+ const [latestPosts, galleryItems, services, serviceAreas] = await Promise.all([
+  client.fetch<PostCard[]>(latestPostsQuery),
+  client.fetch<HomeGalleryItem[]>(homeGalleryQuery),
+  client.fetch<ServiceItem[]>(allServicesQuery),
+  client.fetch<{ _id: string; name: string; slug: string }[]>(serviceAreasQuery),
+]);
 
   const featuredServices = services.filter((s) => s.featuredOnHome).slice(0, 4);
 
@@ -240,12 +241,13 @@ export default async function HomePage(): Promise<React.JSX.Element> {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
-      <HomeClient
-        latestPosts={latestPosts}
-        galleryItems={galleryItems ?? []}
-        featuredServices={featuredServices}
-        faqs={homeFaqs}
-      />
+     <HomeClient
+  latestPosts={latestPosts}
+  galleryItems={galleryItems ?? []}
+  featuredServices={featuredServices}
+  faqs={homeFaqs}
+  serviceAreas={serviceAreas ?? []}
+/>
     </>
   );
 }

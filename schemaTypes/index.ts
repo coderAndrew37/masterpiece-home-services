@@ -8,6 +8,7 @@ import { post } from './post';
 import { author } from './author';
 import { category } from './category';
 import { homeGalleryItem } from './homeGalleryItem';
+import {serviceArea} from './serviceArea'
 
 // Objects
 import { blockContent } from './blockContent';
@@ -34,6 +35,7 @@ export const schema: {types: SchemaTypeDefinition[]} = {
     galleryImage,
     pricingPlan,
     addon,
+    serviceArea,
   ],
 }
 
