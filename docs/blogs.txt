@@ -1,0 +1,59 @@
+Cluster 1: Eavestrough & Gutter Cleaning (10)
+#	Blog Title	Primary Keyword Target
+1	The Complete Guide to Eavestrough Cleaning Before Winter in Kamloops	eavestrough cleaning near me / gutter cleaning near me
+2	How Much Does Gutter Cleaning Cost in Kamloops? (2026 Pricing Guide)	gutter cleaning cost / eavestrough cleaning cost
+3	7 Warning Signs Your Gutters Need Cleaning Right Now	(long-tail PAA — signs/symptoms angle, no head-term overlap)
+4	What Happens If You Don't Clean Your Eavestroughs Before the First Freeze	PAA-sourced, informational/fear-based angle
+5	DIY vs. Professional Gutter Cleaning: What's the Real Difference in Cost and Safety	gutter cleaning near me (secondary)
+6	Why Plants Are Growing in Your Gutters (And What It Means)	PAA-sourced
+7	Sagging or Pulling Gutters: What It's Telling You About Your Home	PAA-sourced
+8	The Tools Needed to Clean Eavestroughs Safely — And Why Most Homeowners Skip This	PAA-sourced
+9	How Often Should You Clean Your Gutters in Kamloops's Dry Climate?	seasonal/local-specific, no direct keyword overlap
+10	Overflowing Gutters During Rain: What It Signals and How Urgent It Is	PAA-sourced
+
+
+Cluster 2: Window Cleaning (8)
+#	Blog Title	Primary Keyword Target
+11	How Often Should You Clean Windows in Kamloops's Dry, Dusty Climate?	window cleaning kamloops
+12	The Recommended Window Cleaning Schedule for Kamloops Homes	window cleaning kamloops (secondary)
+13	Does Kamloops Weather Really Affect How Often You Should Wash Windows?	local/seasonal informational
+14	Summer vs. Winter: When Should You Really Clean Your Windows in Kamloops?	seasonal informational
+15	How Many Times a Year Do Professional Window Cleaners Recommend Service?	PAA-sourced
+16	The Best Way to Clean Outside Windows (And Why Pure-Water Systems Win)	best way to clean outside window
+17	What Makes a "Best" Outdoor Window Cleaner? A Homeowner's Buying Guide	best outdoor window cleaner
+18	Hard Water Stains on Windows: Why Kamloops Homes Are Especially Prone	local/climate angle, ties to your neighborhood content strategy
+Cluster 3: House / Exterior Washing (Soft Wash) (9)
+#	Blog Title	Primary Keyword Target
+19	Soft Washing vs. Pressure Washing: What's the Difference for Home Siding?	soft washing vs pressure washing (PAA)
+20	Is Soft Washing or Pressure Washing Better for Vinyl Siding in Canada?	PAA-sourced
+21	Can Pressure Washing Damage Your Home's Siding? What to Know First	PAA-sourced
+22	Removing Mold and Mildew From Siding in Kamloops's Wet Spring Season	PAA-sourced + seasonal local angle
+23	How to Decide Between Soft Washing and Pressure Washing for Your Exterior	PAA-sourced
+24	Exterior Home Cleaning 101: What's Actually Involved	exterior home cleaning / exterior house cleaning
+25	House Washing Near Me: What to Expect From a Professional Exterior Clean	house washing near me
+26	The Real Cost of Exterior House Cleaning in Kamloops	cleaners for outside of house / cleaning outside the house
+27	House Washing Services Near Me: How to Choose the Right Company	house washing services near me
+Cluster 4: Pressure & Surface Washing (6)
+#	Blog Title	Primary Keyword Target
+28	How to Power Wash Your House Without Damaging Paint or Siding	power wash your house / power washing your home
+29	Pressure Washing Your Driveway, Deck, and Walkways: A Kamloops Homeowner's Guide	pressure house washing
+30	House Siding Cleaning: When Pressure Washing Is (and Isn't) the Right Call	house siding cleaning
+31	Concrete and Surface Staining in Kamloops: Causes and Fixes	local/seasonal, supports pressure washing service page
+32	How Often Should You Pressure Wash Your Kamloops Home's Exterior?	seasonal informational
+33	Pressure Washing Before Selling Your Home: Does It Actually Boost Value?	conversion-adjacent informational
+Cluster 5: Christmas Lights Installation (6)
+#	Blog Title	Primary Keyword Target
+34	Creative Christmas Light Installation Ideas for Canadian Home Exteriors	PAA-sourced
+35	How to Safely Install Christmas Lights on a Two-Storey House	PAA-sourced
+36	Best Christmas Lights for Cold Canadian Winters (And What to Avoid)	PAA-sourced
+37	Designing a Professional-Looking Christmas Light Display for Your Roofline and Trees	PAA-sourced
+38	Energy-Efficient Christmas Lighting Options for Your Home's Exterior	PAA-sourced
+39	When to Book Christmas Light Installation in Kamloops (Before You're on a Waitlist)	seasonal/local urgency angle, high conversion intent
+Cluster 6: Indoor House Cleaning (4)
+#	Blog Title	Primary Keyword Target
+40	How Often Should You Deep Clean Your Home in Kamloops?	fills service gap — no keyword data pulled yet for this service
+41	Move-In/Move-Out Cleaning Checklist for Kamloops Renters and Homeowners	high-intent seasonal/life-event angle
+42	What's Included in a Professional Indoor House Cleaning?	informational, supports service page
+43	Spring Cleaning vs. Professional Deep Cleaning: What's the Difference?	seasonal angle
+
+Total: 43 posts.

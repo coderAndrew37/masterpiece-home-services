@@ -1,30 +1,30 @@
 import type { Metadata } from 'next';
+
 import ContactClient from './page.client';
+import { sanityFetch } from '@/lib/sanity/client';
+import { serviceAreasQuery } from '@/lib/sanity/queries';
 
 export const metadata: Metadata = {
   title: 'Contact Us | Free Quote for Window & Gutter Cleaning',
   description:
-    'Contact Shine Windows for professional exterior cleaning services across Toronto, Mississauga, Oakville, and GTA. Get a free, instant estimate today!',
+    'Contact Masterpiece Home Services for professional exterior cleaning services across Kamloops, Sun Peaks, and the Thompson-Okanagan region. Get a free, instant estimate today!',
   openGraph: {
-    title: 'Get a Free Quote | Shine Windows & Gutters',
+    title: 'Get a Free Quote | Masterpiece Home Services',
     description:
-      'Schedule window or gutter cleaning in Ontario. Fast response times and satisfaction guaranteed.',
+      'Schedule window or eavestrough cleaning in Kamloops, BC. Fast response times and satisfaction guaranteed.',
   },
 };
 
-export default function ContactPage() {
-  const serviceAreas = [
-    'Toronto',
-    'Mississauga',
-    'Brampton',
-    'Markham',
-    'Vaughan',
-    'Richmond Hill',
-    'Oakville',
-    'Burlington',
-    'Hamilton',
-    'Oshawa',
-  ];
+interface ServiceAreaItem {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
+export default async function ContactPage() {
+  const serviceAreas = (await sanityFetch<ServiceAreaItem[]>({
+    query: serviceAreasQuery,
+  })) || [];
 
   const faqs = [
     {
@@ -35,22 +35,22 @@ export default function ContactPage() {
     {
       question: 'Do I need to be home during the service?',
       answer:
-        "For exterior cleaning, you don't need to be home. For interior cleaning, we'll need access to your property. We're happy to work with your schedule.",
+        "For exterior cleaning, you don't need to be home as long as exterior water spigots are accessible. For interior detailing, we will coordinate access with you.",
     },
     {
-      question: 'Are your cleaning solutions safe for children and pets?',
+      question: 'Are your cleaning solutions safe for plants and pets?',
       answer:
-        'Absolutely! We use 100% eco-friendly, non-toxic cleaning solutions that are safe for your family and pets.',
+        'Absolutely! We use eco-friendly, biodegradable cleaning solutions along with pure water filtration systems that protect your landscaping and pets.',
     },
     {
       question: 'What payment methods do you accept?',
       answer:
-        'We accept all major credit cards, debit, e-transfer, and cash. Commercial clients may be eligible for net-30 terms.',
+        'We accept Interac e-Transfer, major credit cards, and cheque.',
     },
     {
       question: 'Do you offer service guarantees?',
       answer:
-        "Yes! We offer a 100% satisfaction guarantee. If you're not completely happy with our service, we'll return to make it right at no additional cost.",
+        "Yes! We offer a 100% satisfaction guarantee. If you're not completely happy with our work, we'll return to make it right at no additional cost.",
     },
   ];
 

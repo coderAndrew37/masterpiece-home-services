@@ -13,59 +13,63 @@ interface ProcessTimelineProps {
   steps: ProcessStep[];
 }
 
-export default function ProcessTimeline({ steps }: ProcessTimelineProps): React.JSX.Element {
+// ProcessTimeline.tsx
+export default function ProcessTimeline({ steps }: ProcessTimelineProps) {
   return (
-    <div className="relative max-w-5xl mx-auto px-4">
-      {/* Vertical Timeline Bar */}
-      <div className="absolute left-6 md:left-1/2 top-4 bottom-4 w-1 bg-blue-200 transform md:-translate-x-1/2" />
+    <>
+      {/* Desktop: horizontal, all steps visible at once */}
+      <div className="hidden md:grid md:grid-cols-4 gap-6 relative">
+        <div className="absolute top-6 left-0 right-0 h-1 bg-blue-200 mx-[12.5%]" />
+        {steps.map((step, index) => (
+          <motion.div
+            key={step.step}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1, duration: 0.4 }}
+            className="relative flex flex-col items-center text-center"
+          >
+            <div className="w-12 h-12 bg-blue-700 ring-4 ring-slate-50 shadow-md rounded-full flex items-center justify-center text-white font-black text-base z-10 mb-4">
+              {step.step}
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2">
+              {step.title}
+            </h3>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              {step.description}
+            </p>
+          </motion.div>
+        ))}
+      </div>
 
-      <div className="space-y-12 md:space-y-0">
-        {steps.map((step: ProcessStep, index: number) => {
-          const isEven = index % 2 === 0;
-
-          return (
+      {/* Mobile: keep your existing vertical zigzag */}
+      <div className="md:hidden relative max-w-lg mx-auto px-4">
+        <div className="absolute left-6 top-4 bottom-4 w-1 bg-blue-200" />
+        <div className="space-y-10">
+          {steps.map((step, index) => (
             <motion.div
               key={step.step}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.15, duration: 0.5 }}
-              className={`relative flex flex-col md:flex-row items-center ${
-                isEven ? "md:flex-row-reverse" : ""
-              }`}
+              transition={{ delay: index * 0.1, duration: 0.4 }}
+              className="relative pl-14"
             >
-              {/* Card Container */}
-              <div className="w-full md:w-1/2 pl-14 md:pl-0 md:p-6">
-                <div
-                  className={`bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow ${
-                    isEven ? "md:mr-8" : "md:ml-8"
-                  }`}
-                >
-                  <span className="text-blue-700 font-extrabold text-xs tracking-wider uppercase mb-1 block">
-                    Step 0{step.step}
-                  </span>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
+              <div className="absolute left-0 top-0 w-12 h-12 bg-blue-700 ring-4 ring-slate-50 rounded-full flex items-center justify-center text-white font-black text-base z-10">
+                {step.step}
               </div>
-
-              {/* Numbered Center Circle */}
-              <div className="absolute left-6 md:left-1/2 top-6 md:top-1/2 transform -translate-x-1/2 md:-translate-y-1/2 z-10">
-                <div className="w-12 h-12 bg-blue-700 ring-4 ring-white shadow-md rounded-full flex items-center justify-center text-white font-black text-base">
-                  {step.step}
-                </div>
+              <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <h3 className="text-base font-bold text-slate-900 mb-1.5">
+                  {step.title}
+                </h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  {step.description}
+                </p>
               </div>
-
-              {/* Spacer column for desktop alignment */}
-              <div className="hidden md:block md:w-1/2 md:p-6" />
             </motion.div>
-          );
-        })}
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

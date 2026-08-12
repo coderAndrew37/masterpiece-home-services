@@ -37,15 +37,24 @@ export default function HomeClient({
 }: HomeClientProps): React.JSX.Element {
   return (
     <PageTransition>
+      {/* 1. Hook + immediate conversion */}
       <Hero />
       <StatsBar />
+
+      {/* 2. What we do, how it works */}
       <Services services={featuredServices} />
       <HomeProcess />
-      <WhyChooseUs />
+
+      {/* 3. Proof — kept together, back to back */}
       <BeforeAfterSwiper />
-         <ServiceArea areas={serviceAreas} />
       <Gallery items={galleryItems} />
       <Testimonials />
+
+      {/* 4. Differentiation + logistics (do you serve me?) */}
+      <WhyChooseUs />
+      <ServiceArea areas={serviceAreas} />
+
+      {/* 5. Handle remaining objections */}
       <FAQ
         tagline="Got Questions?"
         title="Frequently Asked Questions"
@@ -53,8 +62,9 @@ export default function HomeClient({
         imageSrc="/images/residential-1.jpg"
         imageAlt="Masterpiece Home Services technician in Kamloops"
       />
+
+      {/* 6. Convert — one continuous closing sequence, no detours */}
       <LeadCapture />
-      <LatestBlogs posts={latestPosts} />
       <CtaBanner
         tagline="Book Service in Kamloops"
         title="Ready for Spotless Windows & Eavestroughs?"
@@ -62,6 +72,9 @@ export default function HomeClient({
         buttonText="Request Free Quote"
       />
       <Contact />
+
+      {/* 7. Low-intent content, for anyone who scrolled past everything */}
+      <LatestBlogs posts={latestPosts} />
     </PageTransition>
   );
 }

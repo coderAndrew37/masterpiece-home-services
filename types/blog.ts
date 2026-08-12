@@ -28,4 +28,6 @@ export interface PostDetail extends Omit<PostCard, "author"> {
     role?: string;
     bio?: string;
   };
+  updatedAt?: string;
+  noIndex?: boolean;
 }

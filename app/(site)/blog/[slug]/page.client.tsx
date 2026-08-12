@@ -32,6 +32,10 @@ export default function BlogDetailClient({
     day: 'numeric',
   });
 
+  const updatedDate = post.updatedAt
+    ? new Date(post.updatedAt).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
+
   return (
     <PageTransition>
       {/* Hero Banner */}
@@ -44,6 +48,7 @@ export default function BlogDetailClient({
             priority
             quality={85}
             className="object-cover object-center opacity-30 scale-105"
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
         </div>
@@ -74,7 +79,7 @@ export default function BlogDetailClient({
             {post.title}
           </motion.h1>
 
-          <div className="flex items-center gap-5 text-sm text-slate-300 font-medium">
+          <div className="flex items-center gap-5 text-sm text-slate-300 font-medium flex-wrap">
             <span className="flex items-center gap-1.5">
               <FiCalendar className="w-4 h-4 text-blue-400" /> {date}
             </span>
@@ -82,6 +87,9 @@ export default function BlogDetailClient({
               <span className="flex items-center gap-1.5">
                 <FiClock className="w-4 h-4 text-blue-400" /> {post.readingTime} min read
               </span>
+            )}
+            {updatedDate && updatedDate !== date && (
+              <span className="text-slate-400 text-xs">Updated {updatedDate}</span>
             )}
           </div>
         </div>
@@ -92,13 +100,13 @@ export default function BlogDetailClient({
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Left Content Column */}
-            <div className="lg:col-span-8 space-y-16">
+            <div className="lg:col-span-8 space-y-8">
               <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm">
                 <PortableText value={post.body} components={portableTextComponents} />
               </div>
 
               {post.tags && post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 -mt-8">
+                <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
@@ -122,7 +130,7 @@ export default function BlogDetailClient({
                 <div className="bg-slate-950 text-white rounded-3xl p-7 border border-slate-800 shadow-xl space-y-4">
                   <h3 className="text-lg font-black text-white">Ready for a Free Quote?</h3>
                   <p className="text-slate-400 text-xs leading-relaxed">
-                    Get your property serviced by Kamloops’ highest-rated technicians.
+                    Get your property serviced by Kamloops&apos; highest-rated technicians.
                   </p>
                   <a
                     href="/pricing"

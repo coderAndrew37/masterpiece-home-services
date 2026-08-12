@@ -15,31 +15,37 @@ interface FAQItem {
   answer: string;
 }
 
+interface ServiceAreaItem {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
 interface ContactClientProps {
-  serviceAreas?: string[];
+  serviceAreas?: ServiceAreaItem[];
   faqs?: FAQItem[];
 }
 
 const defaultContactFAQs: FAQItem[] = [
   {
-    question: "How fast can I get a quote for my Kamloops home?",
+    question: 'How fast can I get a quote for my Kamloops home?',
     answer:
-      "We provide rapid online quotes within 24 hours. Simply fill out our contact form or call us directly with your home address and the services required.",
+      'We provide rapid online quotes within 24 hours. Simply fill out our contact form or call us directly with your home address and the services required.',
   },
   {
-    question: "How often should I get my windows and eavestroughs cleaned?",
+    question: 'How often should I get my windows and eavestroughs cleaned?',
     answer:
-      "For most Kamloops homes, we recommend exterior window detailing twice a year (spring and autumn) and eavestrough clearing at least once in late autumn to prevent pine needle buildup and winter ice dams.",
+      'For most Kamloops homes, we recommend exterior window detailing twice a year (spring and autumn) and eavestrough clearing at least once in late autumn to prevent pine needle buildup and winter ice dams.',
   },
   {
-    question: "Are you fully insured and WorkSafeBC covered?",
+    question: 'Are you fully insured and WorkSafeBC covered?',
     answer:
-      "Yes, Masterpiece Home Services carries $5M in commercial general liability insurance and full WorkSafeBC coverage for complete peace of mind.",
+      'Yes, Masterpiece Home Services carries $5M in commercial general liability insurance and full WorkSafeBC coverage for complete peace of mind.',
   },
 ];
 
 export default function ContactClient({
-  serviceAreas = ["Kamloops", "Sun Peaks", "Valleyview", "Sahali", "Aberdeen", "Westsyde"],
+  serviceAreas = [],
   faqs = defaultContactFAQs,
 }: ContactClientProps): React.JSX.Element {
   return (
@@ -48,7 +54,7 @@ export default function ContactClient({
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/residential-1.jpg" // High-res exterior home background
+            src="/images/residential-1.jpg"
             alt="Masterpiece Home Services Kamloops"
             fill
             priority
@@ -137,7 +143,7 @@ export default function ContactClient({
       </section>
 
       {/* 3. Service Areas Covered */}
-      <ServiceArea  />
+      <ServiceArea areas={serviceAreas} />
 
       {/* 4. Frequently Asked Questions */}
       <FAQ faqs={faqs} />

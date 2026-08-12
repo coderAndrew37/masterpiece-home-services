@@ -50,6 +50,7 @@ export const post = defineType({
       name: 'body',
       title: 'Body',
       type: 'blockContent',
+      description: 'Insert tables, CTAs, and FAQ groups directly using the toolbar buttons.',
       validation: (Rule) => Rule.required(),
       group: 'content',
     }),
@@ -87,6 +88,13 @@ export const post = defineType({
       group: 'meta',
     }),
     defineField({
+      name: 'updatedAt',
+      title: 'Last Updated At',
+      type: 'datetime',
+      group: 'meta',
+      description: 'Update manually on material revisions — feeds dateModified in BlogPosting schema for freshness signals.',
+    }),
+    defineField({
       name: 'featured',
       title: 'Featured Post',
       type: 'boolean',
@@ -107,6 +115,14 @@ export const post = defineType({
       type: 'array',
       of: [{type: 'reference', to: [{type: 'service'}]}],
       description: 'Optional — link this post to the service(s) it discusses, for cross-promotion.',
+      group: 'meta',
+    }),
+    defineField({
+      name: 'relatedServiceAreas',
+      title: 'Related Service Areas',
+      type: 'array',
+      of: [{type: 'reference', to: [{type: 'serviceArea'}]}],
+      description: 'Optional — link this post to neighborhood(s) it references, for internal linking to /service-areas/[slug].',
       group: 'meta',
     }),
 
@@ -133,6 +149,14 @@ export const post = defineType({
       type: 'image',
       description: 'Overrides the Open Graph image. Leave blank to fall back to Main Image.',
       group: 'seo',
+    }),
+    defineField({
+      name: 'noIndex',
+      title: 'Exclude from Search Engines',
+      type: 'boolean',
+      initialValue: false,
+      group: 'seo',
+      description: 'Toggle on to noindex this post (thin content, duplicate coverage, etc). Use if two posts end up cannibalizing the same keyword.',
     }),
   ],
   preview: {

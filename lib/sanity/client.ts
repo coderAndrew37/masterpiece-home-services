@@ -1,4 +1,4 @@
-import { createClient } from 'next-sanity';
+import { createClient, type QueryParams } from 'next-sanity';
 import { createImageUrlBuilder } from '@sanity/image-url';
 
 export const client = createClient({
@@ -12,4 +12,24 @@ export const client = createClient({
 const builder = createImageUrlBuilder(client);
 export function urlFor(source: any) {
   return builder.image(source);
+}
+
+// Fetch helper with Next.js revalidation support
+export async function sanityFetch<T>({
+  query,
+  params = {},
+  revalidate = 60,
+  tags = [],
+}: {
+  query: string;
+  params?: QueryParams;
+  revalidate?: number | false;
+  tags?: string[];
+}): Promise<T> {
+  return client.fetch<T>(query, params, {
+    next: {
+      revalidate,
+      tags,
+    },
+  });
 }

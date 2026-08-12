@@ -1,12 +1,11 @@
-import type { Metadata } from "next";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Toaster } from "sonner";
 import CookieConsent from "@/components/CookieConsent";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import LeadModal from "@/components/LeadModal";
-import Newsletter from "@/components/Newsletter";
 import QuoteModal from "@/components/QuoteModal";
 import { QuoteModalProvider } from "@/components/QuoteModalProvider";
+import type { Metadata } from "next";
+import { Toaster } from "sonner";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://masterpiecehomeservices.ca";
 
@@ -141,7 +140,6 @@ export default function SiteLayout({
 
       <Header />
       <main className="grow">{children}</main>
-      <Newsletter />
       <Footer />
 
       <CookieConsent />

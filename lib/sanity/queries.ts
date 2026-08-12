@@ -9,6 +9,7 @@ const postCardProjection = groq`{
   mainImage,
   publishedAt,
   readingTime,
+  noIndex,
   "author": author->{ name, "slug": slug.current, image },
   "categories": categories[]->{ title, "slug": slug.current }
 }`;
@@ -34,15 +35,19 @@ export const postBySlugQuery = groq`
     excerpt,
     mainImage,
     body,
+    faqs,
     publishedAt,
+    updatedAt,
     readingTime,
     tags,
+    noIndex,
     seoTitle,
     seoDescription,
     seoImage,
     "author": author->{ name, "slug": slug.current, image, role, bio },
     "categories": categories[]->{ title, "slug": slug.current },
-    "relatedServiceSlugs": relatedServices[]->slug.current
+    "relatedServiceSlugs": relatedServices[]->slug.current,
+    "relatedServiceAreaSlugs": relatedServiceAreas[]->slug.current
   }
 `;
 
