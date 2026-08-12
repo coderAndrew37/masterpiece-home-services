@@ -126,10 +126,19 @@ export const sidebarPostsQuery = groq`
   *[_type == "post" && slug.current != $slug] | order(publishedAt desc)[0...5] ${postCardProjection}
 `;
 
-// add to sanity/queries.ts
 export const homePricingQuery = /* groq */ `
 *[_type == "pricingPage"][0]{
   "plans": residentialPricing[featuredOnHome != false]{
     title, description, price, features, popular
   }
 }`;
+
+export const relatedServicesBySlugsQuery = groq`
+  *[_type == "service" && slug.current in $slugs]{
+    _id,
+    title,
+    "slug": slug.current,
+    startingPrice,
+    icon
+  }
+`;

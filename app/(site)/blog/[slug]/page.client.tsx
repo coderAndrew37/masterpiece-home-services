@@ -11,15 +11,18 @@ import CtaBanner from '@/components/CtaBanner';
 import AuthorCard from '@/components/blog/AuthorCard';
 import ShareButtons from '@/components/blog/ShareButtons';
 import RelatedPosts from '@/components/blog/RelatedPosts';
+import RelatedServices from '@/components/RelatedServices';
 import SidebarPostList from '@/components/blog/SidebarPostList';
 import { portableTextComponents } from '@/components/blog/PortableTextComponents';
 import { urlFor } from '@/lib/sanity/client';
 import type { PostCard, PostDetail } from '@/types/blog';
+import type { RelatedServiceItem } from '@/types/service';
 
 interface BlogDetailClientProps {
   post: PostDetail;
   relatedPosts: PostCard[];
   sidebarPosts: PostCard[];
+  relatedServices: RelatedServiceItem[];
   siteUrl: string;
 }
 
@@ -27,6 +30,7 @@ export default function BlogDetailClient({
   post,
   relatedPosts,
   sidebarPosts,
+  relatedServices,
   siteUrl,
 }: BlogDetailClientProps): React.JSX.Element {
   const date = new Date(post.publishedAt).toLocaleDateString('en-CA', {
@@ -39,9 +43,13 @@ export default function BlogDetailClient({
     ? new Date(post.updatedAt).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
     : null;
 
+  const ctaDescription =
+    relatedServices.length > 0
+      ? `Ready for ${relatedServices[0].title.toLowerCase()}? Get a fast, no-obligation quote from Kamloops' insured, WorkSafeBC-covered crew.`
+      : "Our team provides window washing, soft washing, gutter care, and more across Kamloops.";
+
   return (
     <PageTransition>
-      {/* Article Header — light, editorial, title-first */}
       <section className="bg-white pt-14 pb-8 border-b border-slate-100">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -86,7 +94,6 @@ export default function BlogDetailClient({
         </div>
       </section>
 
-      {/* Hero Image + Caption */}
       <section className="bg-white pb-4">
         <div className="container mx-auto px-4 max-w-4xl">
           <figure>
@@ -97,6 +104,7 @@ export default function BlogDetailClient({
                 fill
                 priority
                 quality={85}
+                sizes="(max-width: 768px) 100vw, 896px"
                 className="object-cover"
                 unoptimized
               />
@@ -108,15 +116,15 @@ export default function BlogDetailClient({
         </div>
       </section>
 
-      {/* Main Content Layout */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* Left Content Column — no card border, just prose */}
             <div className="lg:col-span-8 space-y-10">
               <div>
                 <PortableText value={post.body} components={portableTextComponents} />
               </div>
+
+              <RelatedServices services={relatedServices} />
 
               {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
@@ -135,7 +143,6 @@ export default function BlogDetailClient({
               <ShareButtons url={`${siteUrl}/blog/${post.slug}`} title={post.title} />
             </div>
 
-            {/* Right Sidebar */}
             <div className="lg:col-span-4">
               <div className="sticky top-28 space-y-6">
                 <SidebarPostList posts={sidebarPosts} title="Latest Articles" />
@@ -146,10 +153,10 @@ export default function BlogDetailClient({
                     Get your property serviced by Kamloops&apos; highest-rated technicians.
                   </p>
                   <a
-                    href="/pricing"
+                    href={relatedServices[0] ? `/services/${relatedServices[0].slug}` : '/pricing'}
                     className="w-full inline-flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-600 text-white font-extrabold py-3.5 px-6 rounded-2xl text-sm transition-all"
                   >
-                    <span>View Pricing</span>
+                    <span>{relatedServices[0] ? `Book ${relatedServices[0].title}` : 'View Pricing'}</span>
                     <FiArrowRight className="w-4 h-4" />
                   </a>
                 </div>
@@ -157,7 +164,6 @@ export default function BlogDetailClient({
             </div>
           </div>
 
-          {/* Related Articles — full width below the two-column layout */}
           <div className="mt-16 pt-12 border-t border-slate-100">
             <RelatedPosts posts={relatedPosts} />
           </div>
@@ -167,7 +173,7 @@ export default function BlogDetailClient({
       <CtaBanner
         tagline="Kamloops & Surrounding Areas"
         title="Ready to Book Your Service?"
-        description="Our team provides streak-free window wash, soft washing, eavestrough care, and Christmas light setups across Kamloops."
+        description={ctaDescription}
         buttonText="Get Free Quote"
       />
     </PageTransition>

@@ -1,10 +1,16 @@
-// src/app/blog/[slug]/page.tsx
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { client } from '@/lib/sanity/client';
-import { allPostSlugsQuery, postBySlugQuery, relatedPostsQuery, sidebarPostsQuery } from '@/lib/sanity/queries';
+import {
+  allPostSlugsQuery,
+  postBySlugQuery,
+  relatedPostsQuery,
+  sidebarPostsQuery,
+  relatedServicesBySlugsQuery,
+} from '@/lib/sanity/queries';
 import { urlFor } from '@/lib/sanity/client';
 import type { PostCard, PostDetail } from '@/types/blog';
+import type { RelatedServiceItem } from '@/types/service';
 import BlogDetailClient from './page.client';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.masterpiecehomeservices.ca';
@@ -46,11 +52,13 @@ export async function generateMetadata({
   const title = post.seoTitle || post.title;
   const description = post.seoDescription || post.excerpt;
   const imageSource = post.seoImage || post.mainImage;
+  const ogImageUrl = imageSource ? urlFor(imageSource).width(1200).height(630).url() : undefined;
+  const postUrl = `${SITE_URL}/blog/${post.slug}`;
 
   return {
     title: `${title} | Masterpiece Blog`,
     description,
-    alternates: { canonical: `${SITE_URL}/blog/${post.slug}` },
+    alternates: { canonical: postUrl },
     robots: post.noIndex
       ? { index: false, follow: true }
       : {
@@ -61,11 +69,17 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `${SITE_URL}/blog/${post.slug}`,
+      url: postUrl,
       type: 'article',
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt || post.publishedAt,
-      images: imageSource ? [{ url: urlFor(imageSource).width(1200).height(630).url() }] : undefined,
+      images: ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ogImageUrl ? [ogImageUrl] : undefined,
     },
   };
 }
@@ -83,16 +97,21 @@ export default async function BlogDetailPage({
   }
 
   const categorySlugs = post.categories?.map((c) => c.slug) || [];
-  const [relatedPosts, sidebarPosts] = await Promise.all([
+  const [relatedPosts, sidebarPosts, relatedServices] = await Promise.all([
     categorySlugs.length
       ? client.fetch<PostCard[]>(relatedPostsQuery, { slug, categorySlugs })
       : Promise.resolve([]),
     client.fetch<PostCard[]>(sidebarPostsQuery, { slug }),
+    post.relatedServiceSlugs?.length
+      ? client.fetch<RelatedServiceItem[]>(relatedServicesBySlugsQuery, { slugs: post.relatedServiceSlugs })
+      : Promise.resolve([]),
   ]);
 
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
   const faqs = extractFaqs(post.body);
 
+  // publisher references the homepage Organization node by @id rather than
+  // redeclaring it — same pattern as Service/ServiceArea schema elsewhere.
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -103,11 +122,7 @@ export default async function BlogDetailPage({
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     author: post.author ? { '@type': 'Person', name: post.author.name } : undefined,
-    publisher: {
-      '@type': 'Organization',
-      name: 'Masterpiece Home Services',
-      url: SITE_URL,
-    },
+    publisher: { '@id': `${SITE_URL}/#organization` },
     mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
   };
 
@@ -140,7 +155,13 @@ export default async function BlogDetailPage({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <BlogDetailClient post={post} relatedPosts={relatedPosts} sidebarPosts={sidebarPosts} siteUrl={SITE_URL} />
+      <BlogDetailClient
+        post={post}
+        relatedPosts={relatedPosts}
+        sidebarPosts={sidebarPosts}
+        relatedServices={relatedServices}
+        siteUrl={SITE_URL}
+      />
     </>
   );
 }

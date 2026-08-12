@@ -22,6 +22,17 @@ export interface ServiceItem {
   homeSubtitle?: string;
 }
 
+export interface RelatedServiceItem {
+  _id: string;
+  blurb?: string;
+ 
+    title: string;
+    slug: string;
+    icon: string;
+    startingPrice?: string;
+ 
+}
+
 // src/types/service.ts — DetailedService, replace metaDescription with:
 export interface DetailedService {
   _id: string;

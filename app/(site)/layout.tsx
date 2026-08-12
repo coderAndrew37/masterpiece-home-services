@@ -6,6 +6,9 @@ import QuoteModal from "@/components/QuoteModal";
 import { QuoteModalProvider } from "@/components/QuoteModalProvider";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import { BookingProvider } from "@/context/BookingContext";
+import BookingModal from "@/components/BookingModal";
+
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://masterpiecehomeservices.ca";
 
@@ -137,6 +140,7 @@ export default function SiteLayout({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <BookingProvider>
 
       <Header />
       <main className="grow">{children}</main>
@@ -146,6 +150,7 @@ export default function SiteLayout({
       <QuoteModal />
       <LeadModal />
       <Toaster position="top-right" richColors closeButton />
+      </BookingProvider>
     </QuoteModalProvider>
   );
 }
