@@ -17,6 +17,8 @@ interface PricingCardProps {
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({ plan, isCommercial }) => {
+  const isCustom = plan.price.toLowerCase().includes("custom");
+
   return (
     <motion.div
       whileHover={{ y: -10 }}
@@ -37,14 +39,19 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, isCommercial }) => {
 
       <div className="p-6 bg-white">
         <div className="text-center mb-6">
-          <div className="text-4xl font-bold text-blue-900 mb-2">
+          <div className="text-4xl font-bold text-blue-900 mb-1">
             {plan.price}
+            {!isCustom && (
+              <span className="text-base font-bold text-blue-700 ml-1.5 align-top">
+                CAD
+              </span>
+            )}
           </div>
-          {isCommercial && plan.price !== "Custom Quote" && (
-            <p className="text-gray-600">per month (min. 3 months)</p>
+          {isCommercial && !isCustom && (
+            <p className="text-gray-600 text-sm">per month (min. 3 months)</p>
           )}
-          {!isCommercial && plan.price !== "Custom Quote" && (
-            <p className="text-gray-600">one-time service</p>
+          {!isCommercial && !isCustom && (
+            <p className="text-gray-600 text-sm">one-time service</p>
           )}
         </div>
 
@@ -69,7 +76,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, isCommercial }) => {
               : "bg-blue-100 text-blue-900 hover:bg-blue-200"
           }`}
         >
-          {plan.price === "Custom Quote" ? "Get Custom Quote" : "Select Plan"}
+          {isCustom ? "Get Custom Quote" : "Select Plan"}
         </motion.a>
       </div>
     </motion.div>

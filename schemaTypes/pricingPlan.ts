@@ -11,7 +11,6 @@ export const pricingPlan = defineType({
       name: 'description',
       title: 'Scope',
       type: 'string',
-      description: 'e.g. "Perfect for routine maintenance, seasonal window washes & quick indoor tidy-ups."',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -27,6 +26,13 @@ export const pricingPlan = defineType({
       validation: (Rule) => Rule.required().min(1),
     }),
     defineField({name: 'popular', title: 'Highlight as Most Popular', type: 'boolean', initialValue: false}),
+    defineField({
+      name: 'featuredOnHome',
+      title: 'Show on Homepage',
+      type: 'boolean',
+      description: 'Include this plan in the condensed pricing preview on the homepage.',
+      initialValue: true,
+    }),
   ],
   preview: {select: {title: 'title', subtitle: 'price'}},
 })

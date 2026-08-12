@@ -1,13 +1,21 @@
 // src/app/page.tsx
 import type { Metadata } from 'next';
 import { client } from '@/lib/sanity/client';
-import { latestPostsQuery, homeGalleryQuery, allServicesQuery, serviceAreasQuery } from '@/lib/sanity/queries';
+import {
+  latestPostsQuery,
+  homeGalleryQuery,
+  allServicesQuery,
+  serviceAreasQuery,
+  homePricingQuery,
+} from '@/lib/sanity/queries';
 import type { PostCard } from '@/types/blog';
 import type { HomeGalleryItem } from '@/types/gallery';
+import type { PricingPlan } from '@/types/pricing';
 import HomeClient from './page.client';
 import { ServiceItem } from '@/types/service';
 import { homeFaqs } from '@/lib/data/homeFaqs';
 import { phoneNumber } from '@/lib/constants';
+import { defaultResidentialPricing } from '@/lib/fallback/pricingData';
 
 // BASE METADATA & SEO CONFIGURATION
 const SITE_URL = 'https://www.masterpiecehomeservices.ca';
@@ -72,14 +80,26 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function HomePage(): Promise<React.JSX.Element> {
- const [latestPosts, galleryItems, services, serviceAreas] = await Promise.all([
-  client.fetch<PostCard[]>(latestPostsQuery),
-  client.fetch<HomeGalleryItem[]>(homeGalleryQuery),
-  client.fetch<ServiceItem[]>(allServicesQuery),
-  client.fetch<{ _id: string; name: string; slug: string }[]>(serviceAreasQuery),
-]);
+  const [latestPosts, galleryItems, services, serviceAreas] = await Promise.all([
+    client.fetch<PostCard[]>(latestPostsQuery),
+    client.fetch<HomeGalleryItem[]>(homeGalleryQuery),
+    client.fetch<ServiceItem[]>(allServicesQuery),
+    client.fetch<{ _id: string; name: string; slug: string }[]>(serviceAreasQuery),
+  ]);
 
   const featuredServices = services.filter((s) => s.featuredOnHome).slice(0, 4);
+
+  // Pricing preview for the homepage — isolated fetch so a Sanity hiccup
+  // here never takes down the rest of the homepage's data.
+  let pricingPlans: PricingPlan[] = defaultResidentialPricing;
+  try {
+    const pricingData = await client.fetch<{ plans: PricingPlan[] } | null>(homePricingQuery);
+    if (pricingData?.plans && pricingData.plans.length > 0) {
+      pricingPlans = pricingData.plans;
+    }
+  } catch (error) {
+    console.error('Failed to fetch homepage pricing from Sanity, falling back to static data:', error);
+  }
 
   // LocalBusiness Structured Data (JSON-LD) for Google Local Pack & Maps Rankings
   // @id is REQUIRED here — every /services/[slug] page's Service schema references
@@ -92,18 +112,18 @@ export default async function HomePage(): Promise<React.JSX.Element> {
     url: SITE_URL,
     logo: `${SITE_URL}/logo.png`,
     image: `${SITE_URL}/images/og-image.jpg`,
-    telephone: {phoneNumber}, // TODO: real number
+    telephone: phoneNumber, // TODO: confirm this is the real, publicly-listed number
     priceRange: '$$',
     description:
       'Professional residential and commercial window cleaning, soft wash house cleaning, eavestrough clearing, pressure washing, indoor cleaning, and seasonal Christmas lights installation in Kamloops, BC.',
     address: {
-  '@type': 'PostalAddress',
-  streetAddress: '820 Newman Street',
-  addressLocality: 'Kamloops',
-  addressRegion: 'BC',
-  postalCode: 'V2B 5H4',
-  addressCountry: 'CA',
-},
+      '@type': 'PostalAddress',
+      streetAddress: '820 Newman Street',
+      addressLocality: 'Kamloops',
+      addressRegion: 'BC',
+      postalCode: 'V2B 5H4',
+      addressCountry: 'CA',
+    },
     geo: {
       '@type': 'GeoCoordinates',
       latitude: 50.6745,
@@ -241,13 +261,14 @@ export default async function HomePage(): Promise<React.JSX.Element> {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
-     <HomeClient
-  latestPosts={latestPosts}
-  galleryItems={galleryItems ?? []}
-  featuredServices={featuredServices}
-  faqs={homeFaqs}
-  serviceAreas={serviceAreas ?? []}
-/>
+      <HomeClient
+        latestPosts={latestPosts}
+        galleryItems={galleryItems ?? []}
+        featuredServices={featuredServices}
+        faqs={homeFaqs}
+        serviceAreas={serviceAreas ?? []}
+        pricingPlans={pricingPlans}
+      />
     </>
   );
 }

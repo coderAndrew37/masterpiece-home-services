@@ -11,6 +11,7 @@ import HomeProcess from '@/components/HomeProcess';
 import LatestBlogs from '@/components/blog/LatestBlogs';
 import LeadCapture from '@/components/LeadCapture';
 import PageTransition from '@/components/PageTransition';
+import PricingTiers from '@/components/PricingTiers';
 import ServiceArea from '@/components/ServiceArea';
 import Services from '@/components/Services';
 import StatsBar from '@/components/StatsBar';
@@ -19,13 +20,15 @@ import WhyChooseUs from '@/components/WhyChooseUs';
 import type { PostCard } from '@/types/blog';
 import type { HomeGalleryItem } from '@/types/gallery';
 import type { ServiceItem } from '@/types/service';
+import type { PricingPlan } from '@/types/pricing';
 
 interface HomeClientProps {
   latestPosts: PostCard[];
   galleryItems: HomeGalleryItem[];
   featuredServices: ServiceItem[];
   faqs: FAQItem[];
-   serviceAreas: { _id: string; name: string; slug: string }[];
+  serviceAreas: { _id: string; name: string; slug: string }[];
+  pricingPlans: PricingPlan[];
 }
 
 export default function HomeClient({
@@ -34,27 +37,24 @@ export default function HomeClient({
   featuredServices,
   faqs,
   serviceAreas,
+  pricingPlans,
 }: HomeClientProps): React.JSX.Element {
   return (
     <PageTransition>
-      {/* 1. Hook + immediate conversion */}
       <Hero />
       <StatsBar />
 
-      {/* 2. What we do, how it works */}
       <Services services={featuredServices} />
       <HomeProcess />
+      <PricingTiers plans={pricingPlans} />
 
-      {/* 3. Proof — kept together, back to back */}
       <BeforeAfterSwiper />
       <Gallery items={galleryItems} />
       <Testimonials />
 
-      {/* 4. Differentiation + logistics (do you serve me?) */}
       <WhyChooseUs />
       <ServiceArea areas={serviceAreas} />
 
-      {/* 5. Handle remaining objections */}
       <FAQ
         tagline="Got Questions?"
         title="Frequently Asked Questions"
@@ -63,7 +63,6 @@ export default function HomeClient({
         imageAlt="Masterpiece Home Services technician in Kamloops"
       />
 
-      {/* 6. Convert — one continuous closing sequence, no detours */}
       <LeadCapture />
       <CtaBanner
         tagline="Book Service in Kamloops"
@@ -73,7 +72,6 @@ export default function HomeClient({
       />
       <Contact />
 
-      {/* 7. Low-intent content, for anyone who scrolled past everything */}
       <LatestBlogs posts={latestPosts} />
     </PageTransition>
   );
