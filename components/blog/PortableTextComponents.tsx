@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FiArrowRight, FiChevronDown } from 'react-icons/fi';
 
+// FaqBlockRenderer — drop the boxed card, use a plain section with a top rule
 function FaqBlockRenderer({
   heading,
   items,
@@ -16,11 +17,10 @@ function FaqBlockRenderer({
   items: { question: string; answer: string }[];
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-
   if (!items?.length) return null;
 
   return (
-    <div className="my-10 bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm">
+    <div className="my-10 pt-8 border-t border-slate-100">
       <h2 className="text-2xl font-extrabold text-slate-900 mb-6">
         {heading || 'Frequently Asked Questions'}
       </h2>
@@ -37,9 +37,7 @@ function FaqBlockRenderer({
               >
                 <span className="font-bold text-slate-900 text-base">{faq.question}</span>
                 <FiChevronDown
-                  className={`w-5 h-5 text-blue-600 shrink-0 transition-transform ${
-                    isOpen ? 'rotate-180' : ''
-                  }`}
+                  className={`w-5 h-5 text-blue-600 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                 />
               </button>
               {isOpen && (
@@ -216,21 +214,26 @@ export const portableTextComponents: PortableTextComponents = {
     },
   },
   types: {
-    image: ({ value }) => {
-      if (!value?.asset) return null;
-      return (
-        <span className="block relative w-full h-72 sm:h-96 rounded-3xl overflow-hidden my-8 border border-slate-200/90">
-          <Image
-            src={urlFor(value).width(1200).height(800).url()}
-            alt={value.alt || ''}
-            fill
-            sizes="(max-width: 768px) 100vw, 700px"
-            className="object-cover"
-          />
-        </span>
-      );
-    },
-
+    // image renderer — replace existing block
+image: ({ value }) => {
+  if (!value?.asset) return null;
+  return (
+    <figure className="my-8">
+      <span className="block relative w-full h-72 sm:h-96 rounded-2xl overflow-hidden">
+        <Image
+          src={urlFor(value).width(1200).height(800).url()}
+          alt={value.alt || ''}
+          fill
+          sizes="(max-width: 768px) 100vw, 700px"
+          className="object-cover"
+        />
+      </span>
+      {value.caption && (
+        <figcaption className="text-xs text-slate-500 mt-2 italic">{value.caption}</figcaption>
+      )}
+    </figure>
+  );
+},
     tableBlock: ({ value }) => (
       <TableBlockRenderer caption={value.caption} hasHeaderRow={value.hasHeaderRow} rows={value.rows} />
     ),

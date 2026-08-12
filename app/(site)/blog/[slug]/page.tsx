@@ -1,7 +1,8 @@
+// src/app/blog/[slug]/page.tsx
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { client } from '@/lib/sanity/client';
-import { allPostSlugsQuery, postBySlugQuery, relatedPostsQuery } from '@/lib/sanity/queries';
+import { allPostSlugsQuery, postBySlugQuery, relatedPostsQuery, sidebarPostsQuery } from '@/lib/sanity/queries';
 import { urlFor } from '@/lib/sanity/client';
 import type { PostCard, PostDetail } from '@/types/blog';
 import BlogDetailClient from './page.client';
@@ -82,9 +83,12 @@ export default async function BlogDetailPage({
   }
 
   const categorySlugs = post.categories?.map((c) => c.slug) || [];
-  const relatedPosts = categorySlugs.length
-    ? await client.fetch<PostCard[]>(relatedPostsQuery, { slug, categorySlugs })
-    : [];
+  const [relatedPosts, sidebarPosts] = await Promise.all([
+    categorySlugs.length
+      ? client.fetch<PostCard[]>(relatedPostsQuery, { slug, categorySlugs })
+      : Promise.resolve([]),
+    client.fetch<PostCard[]>(sidebarPostsQuery, { slug }),
+  ]);
 
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
   const faqs = extractFaqs(post.body);
@@ -136,7 +140,7 @@ export default async function BlogDetailPage({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <BlogDetailClient post={post} relatedPosts={relatedPosts} siteUrl={SITE_URL} />
+      <BlogDetailClient post={post} relatedPosts={relatedPosts} sidebarPosts={sidebarPosts} siteUrl={SITE_URL} />
     </>
   );
 }

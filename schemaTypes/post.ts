@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from 'sanity'
 import {DocumentTextIcon} from '@sanity/icons/DocumentText'
 
 export const post = defineType({
@@ -42,8 +42,43 @@ export const post = defineType({
       title: 'Main Image',
       type: 'image',
       options: {hotspot: true},
-      fields: [{name: 'alt', title: 'Alternative Text', type: 'string'}],
+      fields: [
+        {name: 'alt', title: 'Alternative Text', type: 'string'},
+        {
+          name: 'caption',
+          title: 'Caption / Photo Credit',
+          type: 'string',
+          description: 'Shown below the hero image, e.g. "Eavestrough cleaning in Sahali, Kamloops"',
+        },
+      ],
       validation: (Rule) => Rule.required(),
+      group: 'content',
+    }),
+    defineField({
+      name: 'gallery',
+      title: 'Gallery',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'image',
+          options: {hotspot: true},
+          fields: [
+            {
+              name: 'alt',
+              type: 'string',
+              title: 'Alternative text',
+              description: 'Important for SEO and accessibility.',
+            },
+            {
+              name: 'caption',
+              type: 'string',
+              title: 'Caption (optional)',
+              description: 'Shown below the image in the article body.',
+            },
+          ],
+        }),
+      ],
+      description: 'Optional additional images for the post, separate from the main hero image.',
       group: 'content',
     }),
     defineField({

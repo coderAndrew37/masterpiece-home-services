@@ -11,6 +11,7 @@ import CtaBanner from '@/components/CtaBanner';
 import AuthorCard from '@/components/blog/AuthorCard';
 import ShareButtons from '@/components/blog/ShareButtons';
 import RelatedPosts from '@/components/blog/RelatedPosts';
+import SidebarPostList from '@/components/blog/SidebarPostList';
 import { portableTextComponents } from '@/components/blog/PortableTextComponents';
 import { urlFor } from '@/lib/sanity/client';
 import type { PostCard, PostDetail } from '@/types/blog';
@@ -18,12 +19,14 @@ import type { PostCard, PostDetail } from '@/types/blog';
 interface BlogDetailClientProps {
   post: PostDetail;
   relatedPosts: PostCard[];
+  sidebarPosts: PostCard[];
   siteUrl: string;
 }
 
 export default function BlogDetailClient({
   post,
   relatedPosts,
+  sidebarPosts,
   siteUrl,
 }: BlogDetailClientProps): React.JSX.Element {
   const date = new Date(post.publishedAt).toLocaleDateString('en-CA', {
@@ -38,33 +41,20 @@ export default function BlogDetailClient({
 
   return (
     <PageTransition>
-      {/* Hero Banner */}
-      <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={urlFor(post.mainImage).width(1600).height(900).url()}
-            alt={typeof post.mainImage?.alt === 'string' ? post.mainImage.alt : post.title}
-            fill
-            priority
-            quality={85}
-            className="object-cover object-center opacity-30 scale-105"
-            unoptimized
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
-        </div>
-
-        <div className="container mx-auto px-4 max-w-4xl relative z-10">
+      {/* Article Header — light, editorial, title-first */}
+      <section className="bg-white pt-14 pb-8 border-b border-slate-100">
+        <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             <Link
               href="/blog"
-              className="text-xs font-bold text-blue-400 hover:underline uppercase tracking-wider"
+              className="text-xs font-bold text-blue-700 hover:underline uppercase tracking-wider"
             >
               ← All Articles
             </Link>
             {post.categories?.map((category) => (
               <span
                 key={category.slug}
-                className="bg-blue-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider"
+                className="bg-blue-50 text-blue-700 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider"
               >
                 {category.title}
               </span>
@@ -72,22 +62,23 @@ export default function BlogDetailClient({
           </div>
 
           <motion.h1
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight mb-6 leading-tight"
+            className="text-3xl sm:text-4xl lg:text-[2.75rem] font-black text-slate-900 tracking-tight mb-5 leading-[1.1]"
           >
             {post.title}
           </motion.h1>
 
-          <div className="flex items-center gap-5 text-sm text-slate-300 font-medium flex-wrap">
+          <div className="flex items-center gap-5 text-sm text-slate-500 font-medium flex-wrap">
             <span className="flex items-center gap-1.5">
-              <FiCalendar className="w-4 h-4 text-blue-400" /> {date}
+              <FiCalendar className="w-4 h-4 text-blue-600" /> {date}
             </span>
             {post.readingTime && (
               <span className="flex items-center gap-1.5">
-                <FiClock className="w-4 h-4 text-blue-400" /> {post.readingTime} min read
+                <FiClock className="w-4 h-4 text-blue-600" /> {post.readingTime} min read
               </span>
             )}
+            {post.author?.name && <span>By {post.author.name}</span>}
             {updatedDate && updatedDate !== date && (
               <span className="text-slate-400 text-xs">Updated {updatedDate}</span>
             )}
@@ -95,18 +86,40 @@ export default function BlogDetailClient({
         </div>
       </section>
 
+      {/* Hero Image + Caption */}
+      <section className="bg-white pb-4">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <figure>
+            <div className="relative w-full h-72 sm:h-[26rem] rounded-2xl overflow-hidden">
+              <Image
+                src={urlFor(post.mainImage).width(1600).height(900).url()}
+                alt={typeof post.mainImage?.alt === 'string' ? post.mainImage.alt : post.title}
+                fill
+                priority
+                quality={85}
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+            {post.mainImage?.caption && (
+              <figcaption className="text-xs text-slate-500 mt-2 italic">{post.mainImage.caption}</figcaption>
+            )}
+          </figure>
+        </div>
+      </section>
+
       {/* Main Content Layout */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-12 bg-white">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* Left Content Column */}
-            <div className="lg:col-span-8 space-y-8">
-              <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm">
+            {/* Left Content Column — no card border, just prose */}
+            <div className="lg:col-span-8 space-y-10">
+              <div>
                 <PortableText value={post.body} components={portableTextComponents} />
               </div>
 
               {post.tags && post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
                   {post.tags.map((tag) => (
                     <span
                       key={tag}
@@ -118,16 +131,16 @@ export default function BlogDetailClient({
                 </div>
               )}
 
-              <RelatedPosts posts={relatedPosts} />
+              <AuthorCard author={post.author} />
+              <ShareButtons url={`${siteUrl}/blog/${post.slug}`} title={post.title} />
             </div>
 
             {/* Right Sidebar */}
-            <div className="lg:col-span-4 space-y-6">
+            <div className="lg:col-span-4">
               <div className="sticky top-28 space-y-6">
-                <AuthorCard author={post.author} />
-                <ShareButtons url={`${siteUrl}/blog/${post.slug}`} title={post.title} />
+                <SidebarPostList posts={sidebarPosts} title="Latest Articles" />
 
-                <div className="bg-slate-950 text-white rounded-3xl p-7 border border-slate-800 shadow-xl space-y-4">
+                <div className="bg-slate-950 text-white rounded-2xl p-7 space-y-4">
                   <h3 className="text-lg font-black text-white">Ready for a Free Quote?</h3>
                   <p className="text-slate-400 text-xs leading-relaxed">
                     Get your property serviced by Kamloops&apos; highest-rated technicians.
@@ -142,6 +155,11 @@ export default function BlogDetailClient({
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Related Articles — full width below the two-column layout */}
+          <div className="mt-16 pt-12 border-t border-slate-100">
+            <RelatedPosts posts={relatedPosts} />
           </div>
         </div>
       </section>

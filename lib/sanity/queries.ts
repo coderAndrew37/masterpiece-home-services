@@ -120,3 +120,8 @@ export const serviceAreaBySlugQuery = /* groq */ `
 export const serviceAreaSlugsQuery = /* groq */ `
 *[_type == "serviceArea" && published == true].slug.current
 `;
+
+// Sidebar "Latest News" list — excludes the post currently being viewed.
+export const sidebarPostsQuery = groq`
+  *[_type == "post" && slug.current != $slug] | order(publishedAt desc)[0...5] ${postCardProjection}
+`;
