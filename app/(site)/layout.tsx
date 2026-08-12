@@ -131,11 +131,6 @@ export default function SiteLayout({
 }) {
  return (
     <QuoteModalProvider>
-      {/*
-        Only the root layout owns <head> directly. A <script> tag rendered
-        here (inside <body>) is still valid for JSON-LD — search engines
-        read structured data anywhere in the document, not just <head>.
-      */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -149,6 +144,7 @@ export default function SiteLayout({
       <CookieConsent />
       <QuoteModal />
       <LeadModal />
+      <BookingModal />  
       <Toaster position="top-right" richColors closeButton />
       </BookingProvider>
     </QuoteModalProvider>

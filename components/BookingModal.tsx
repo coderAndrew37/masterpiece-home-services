@@ -29,7 +29,7 @@ const URGENCY_OPTIONS = [
 const TOTAL_STEPS = 3;
 
 export default function BookingModal(): React.JSX.Element | null {
-  const { isOpen, presetService, closeBooking } = useBooking();
+  const { isOpen, presetService, presetNote, closeBooking } = useBooking();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,16 +41,20 @@ export default function BookingModal(): React.JSX.Element | null {
     name: "",
     phone: "",
     email: "",
+    notes: "",
   });
 
-  // Reset to a clean state each time the modal is opened, and honor a preset service.
   useEffect(() => {
     if (isOpen) {
       setStep(0);
       setSubmitted(false);
-      setForm((f) => ({ ...f, service: presetService ?? "" }));
+      setForm((f) => ({
+        ...f,
+        service: presetService ?? "",
+        notes: presetNote ?? "",
+      }));
     }
-  }, [isOpen, presetService]);
+  }, [isOpen, presetService, presetNote]);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "unset";
@@ -66,10 +70,16 @@ export default function BookingModal(): React.JSX.Element | null {
 
   if (!isOpen) return null;
 
+  // If the preset service isn't one of our fixed options (e.g. a pricing
+  // plan name like "Complete Home Care"), show it as a selected chip
+  // instead of leaving the grid looking like nothing was chosen.
+  const displayServices =
+    form.service && !SERVICES.includes(form.service) ? [form.service, ...SERVICES] : SERVICES;
+
   const canProceed =
     (step === 0 && form.service !== "") ||
     (step === 1 && form.urgency !== "") ||
-    step === 2; // final validation happens on submit
+    step === 2;
 
   const handleNext = () => {
     if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
@@ -109,7 +119,6 @@ export default function BookingModal(): React.JSX.Element | null {
           onClick={(e) => e.stopPropagation()}
           className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col"
         >
-          {/* Header */}
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
             <div>
               <h2 className="text-lg font-extrabold text-slate-900">
@@ -128,7 +137,6 @@ export default function BookingModal(): React.JSX.Element | null {
             </button>
           </div>
 
-          {/* Progress bar */}
           {!submitted && (
             <div className="px-6 pt-4">
               <div className="flex gap-1.5">
@@ -144,7 +152,6 @@ export default function BookingModal(): React.JSX.Element | null {
             </div>
           )}
 
-          {/* Body */}
           <div className="px-6 py-6 overflow-y-auto">
             {submitted ? (
               <motion.div
@@ -161,10 +168,7 @@ export default function BookingModal(): React.JSX.Element | null {
                   business day with your quote for{" "}
                   <span className="font-semibold text-slate-900">{form.service}</span>.
                 </p>
-                <a
-                  href={phoneTel}
-                  className="text-sm font-bold text-blue-700 hover:underline"
-                >
+                <a href={phoneTel} className="text-sm font-bold text-blue-700 hover:underline">
                   Need it faster? Call us at {phoneNumber} →
                 </a>
               </motion.div>
@@ -178,9 +182,14 @@ export default function BookingModal(): React.JSX.Element | null {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.2 }}
                   >
+                    {form.notes && (
+                      <div className="mb-4 px-3.5 py-2.5 rounded-xl bg-blue-50 text-blue-800 text-xs font-semibold">
+                        {form.notes}
+                      </div>
+                    )}
                     <p className="text-sm font-bold text-slate-900 mb-3">What do you need?</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {SERVICES.map((s) => (
+                      {displayServices.map((s) => (
                         <button
                           key={s}
                           type="button"
@@ -289,8 +298,14 @@ export default function BookingModal(): React.JSX.Element | null {
                       />
                     </div>
 
-                    {/* Submit button lives in the footer for consistent layout, but the
-                        form needs its own hidden submit to catch Enter key presses. */}
+                    <textarea
+                      rows={2}
+                      placeholder="Anything else we should know? (optional)"
+                      value={form.notes}
+                      onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+
                     <button type="submit" className="hidden" aria-hidden="true" />
                   </motion.form>
                 )}
@@ -298,7 +313,6 @@ export default function BookingModal(): React.JSX.Element | null {
             )}
           </div>
 
-          {/* Footer nav */}
           {!submitted && (
             <div className="px-6 pb-6 pt-2 flex items-center gap-3 border-t border-slate-100 mt-auto">
               {step > 0 && (

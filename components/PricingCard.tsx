@@ -2,6 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FiCheck } from "react-icons/fi";
+import { useBooking } from "@/context/BookingContext";
 
 interface PricingPlan {
   title: string;
@@ -18,6 +19,7 @@ interface PricingCardProps {
 
 const PricingCard: React.FC<PricingCardProps> = ({ plan, isCommercial }) => {
   const isCustom = plan.price.toLowerCase().includes("custom");
+  const { openBooking } = useBooking();
 
   return (
     <motion.div
@@ -42,9 +44,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, isCommercial }) => {
           <div className="text-4xl font-bold text-blue-900 mb-1">
             {plan.price}
             {!isCustom && (
-              <span className="text-base font-bold text-blue-700 ml-1.5 align-top">
-                CAD
-              </span>
+              <span className="text-base font-bold text-blue-700 ml-1.5 align-top">CAD</span>
             )}
           </div>
           {isCommercial && !isCustom && (
@@ -66,18 +66,21 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, isCommercial }) => {
           ))}
         </ul>
 
-        <motion.a
-          href="/contact"
+        <motion.button
+          type="button"
+          onClick={() =>
+            openBooking(plan.title, isCustom ? undefined : `${plan.title} — ${plan.price} CAD`)
+          }
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`block text-center py-3 px-6 rounded-lg font-bold ${
+          className={`block w-full text-center py-3 px-6 rounded-lg font-bold ${
             plan.popular
               ? "bg-blue-700 text-white hover:bg-blue-800"
               : "bg-blue-100 text-blue-900 hover:bg-blue-200"
           }`}
         >
           {isCustom ? "Get Custom Quote" : "Select Plan"}
-        </motion.a>
+        </motion.button>
       </div>
     </motion.div>
   );
