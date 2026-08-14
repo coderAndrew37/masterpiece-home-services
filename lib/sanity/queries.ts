@@ -148,3 +148,21 @@ export const testimonialsQuery = groq`
     _id, name, rating, comment, location, publishedAt, source
   }
 `;
+
+export const sitemapPostsQuery = groq`
+  *[_type == "post" && defined(slug.current) && noIndex != true]{
+    "slug": slug.current,
+    "lastModified": coalesce(updatedAt, publishedAt)
+  }
+`;
+
+export const sitemapServicesQuery = groq`
+  *[_type == "service"]{ "slug": slug.current, "lastModified": _updatedAt }
+`;
+
+export const sitemapServiceAreasQuery = groq`
+  *[_type == "serviceArea" && published == true]{
+    "slug": slug.current,
+    "lastModified": _updatedAt
+  }
+`;

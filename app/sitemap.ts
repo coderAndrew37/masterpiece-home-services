@@ -1,73 +1,99 @@
 // app/sitemap.ts
 import type { MetadataRoute } from 'next';
 import { client } from '@/lib/sanity/client';
-import { allPostSlugsQuery, serviceSlugsQuery } from '@/lib/sanity/queries';
+import { sitemapPostsQuery, sitemapServicesQuery, sitemapServiceAreasQuery } from '@/lib/sanity/queries';
 import glob from 'fast-glob';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.masterpiecehomeservices.ca';
 
+// Anything discovered by the glob below that should NOT be in the sitemap
+// despite having a page.tsx \u2014 add it here rather than letting it slip
+// in silently (e.g. a future '/thank-you' or checkout confirmation page).
+const EXCLUDED_ROUTES = new Set<string>([]);
+
+const PRIORITY_BY_ROUTE: Record<string, number> = {
+  '': 1.0,
+  '/services': 0.9,
+  '/service-areas': 0.8,
+  '/blog': 0.8,
+  '/pricing': 0.7,
+  '/gallery': 0.6,
+  '/testimonials': 0.6,
+  '/contact': 0.6,
+  '/why-us': 0.5,
+  '/about': 0.5,
+  '/privacy-policy': 0.1,
+  '/terms-of-service': 0.1,
+};
+
+interface SlugDoc {
+  slug: string;
+  lastModified: string;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 1. Discover static routes while ignoring route groups, dynamic parameters, studio, & APIs
   const pages = await glob('app/**/page.{tsx,jsx,js,ts}', {
     cwd: process.cwd(),
     ignore: [
-      'app/**/\\[*\\]/**', // ignore dynamic route folders e.g. [slug], [[...tool]]
-      'app/api/**',        // ignore API routes
-      'app/**/studio/**',  // ignore Sanity Studio routes
+      'app/**/\\[*\\]/**',
+      'app/api/**',
+      'app/**/studio/**',
     ],
   });
 
   const staticRoutes: MetadataRoute.Sitemap = pages
-    .map((pagePath): MetadataRoute.Sitemap[number] => {
-      // Clean path: remove 'app', route groups like '(site)', and '/page.tsx'
-      const route = pagePath
+    .map((pagePath) =>
+      pagePath
         .replace(/^app/, '')
-        .replace(/\/\([^)]+\)/g, '') // Strips route groups like /(site) or /(studio)
-        .replace(/\/page\.(tsx|jsx|js|ts)$/, '');
+        .replace(/\/\([^)]+\)/g, '')
+        .replace(/\/page\.(tsx|jsx|js|ts)$/, '')
+    )
+    .filter((route) => !route.includes('[') && !route.includes(']'))
+    .filter((route) => !EXCLUDED_ROUTES.has(route))
+    .map((route): MetadataRoute.Sitemap[number] => ({
+      url: `${BASE_URL}${route || ''}`,
+      changeFrequency: route === '' || route === '/blog' ? 'daily' : 'weekly',
+      priority: PRIORITY_BY_ROUTE[route] ?? 0.5,
+    }));
 
-      const changeFrequency = route === '' ? 'daily' : 'weekly';
-
-      return {
-        url: `${BASE_URL}${route || ''}`,
-        lastModified: new Date(),
-        changeFrequency,
-        priority: route === '' ? 1.0 : 0.8,
-      };
-    })
-    // Filter out any leftover dynamic parameters or double slashes
-    .filter((item) => !item.url.includes('[') && !item.url.includes(']'));
-
-  // 2. Dynamically fetch ALL blog posts from Sanity
   let blogRoutes: MetadataRoute.Sitemap = [];
   try {
-    const postSlugs = await client.fetch<string[]>(allPostSlugsQuery);
-    if (postSlugs?.length) {
-      blogRoutes = postSlugs.map((slug) => ({
-        url: `${BASE_URL}/blog/${slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: 0.6,
-      }));
-    }
+    const posts = await client.fetch<SlugDoc[]>(sitemapPostsQuery);
+    blogRoutes = (posts ?? []).map((p) => ({
+      url: `${BASE_URL}/blog/${p.slug}`,
+      lastModified: p.lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }));
   } catch (error) {
     console.error('Failed to fetch blog slugs for sitemap:', error);
   }
 
-  // 3. Dynamically fetch ALL service pages from Sanity
   let serviceRoutes: MetadataRoute.Sitemap = [];
   try {
-    const serviceSlugs = await client.fetch<string[]>(serviceSlugsQuery);
-    if (serviceSlugs?.length) {
-      serviceRoutes = serviceSlugs.map((slug) => ({
-        url: `${BASE_URL}/services/${slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.8,
-      }));
-    }
+    const services = await client.fetch<SlugDoc[]>(sitemapServicesQuery);
+    serviceRoutes = (services ?? []).map((s) => ({
+      url: `${BASE_URL}/services/${s.slug}`,
+      lastModified: s.lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    }));
   } catch (error) {
     console.error('Failed to fetch service slugs for sitemap:', error);
   }
 
-  return [...staticRoutes, ...blogRoutes, ...serviceRoutes];
+  let serviceAreaRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const areas = await client.fetch<SlugDoc[]>(sitemapServiceAreasQuery);
+    serviceAreaRoutes = (areas ?? []).map((a) => ({
+      url: `${BASE_URL}/service-areas/${a.slug}`,
+      lastModified: a.lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch service area slugs for sitemap:', error);
+  }
+
+  return [...staticRoutes, ...blogRoutes, ...serviceRoutes, ...serviceAreaRoutes];
 }
