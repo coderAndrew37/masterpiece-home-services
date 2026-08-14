@@ -1,103 +1,94 @@
-import TestimonialsClient from './page.client';
+// src/app/testimonials/page.tsx
 import type { Metadata } from 'next';
+import { client } from '@/lib/sanity/client';
+import { testimonialsQuery } from '@/lib/sanity/queries';
+import { fetchGooglePlaceReviews } from '@/lib/google/places';
+import TestimonialsClient from './page.client';
+
+const SITE_URL = 'https://www.masterpiecehomeservices.ca';
+const PAGE_URL = `${SITE_URL}/testimonials`;
 
 export const metadata: Metadata = {
-  title: 'Customer Reviews & Testimonials | Shine Windows',
+  title: 'Customer Reviews & Testimonials | Masterpiece Home Services Kamloops',
   description:
-    'Read real customer reviews and watch video testimonials from residential and commercial client stories across Ontario.',
+    'Real customer reviews for Masterpiece Home Services in Kamloops, BC \u2014 window detailing, soft washing, eavestrough clearing, and more.',
+  alternates: { canonical: PAGE_URL },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
   openGraph: {
-    title: 'Client Reviews | Shine Windows & Exterior Cleaning',
-    description:
-      'See why homeowners and property managers trust Shine Windows for reliable exterior cleaning.',
+    title: 'Customer Reviews | Masterpiece Home Services Kamloops',
+    description: 'See what Kamloops homeowners say about Masterpiece Home Services.',
+    url: PAGE_URL,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Customer Reviews | Masterpiece Home Services Kamloops',
+    description: 'See what Kamloops homeowners say about Masterpiece Home Services.',
   },
 };
 
-export default function TestimonialsPage() {
-  const testimonials = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      role: 'Homeowner',
-      rating: 5,
-      content:
-        'The team at ShineWindows did an amazing job on our home. The windows are sparkling clean and they were very professional and efficient.',
-      category: 'residential',
-      date: '2023-08-15',
-    },
-    {
-      id: 2,
-      name: 'Michael Thompson',
-      role: 'Business Owner',
-      rating: 5,
-      content:
-        "We've been using ShineWindows for our office building for 3 years now. Consistent quality and reliable service. Highly recommend!",
-      category: 'commercial',
-      date: '2023-07-22',
-    },
-    {
-      id: 3,
-      name: 'Emily Rodriguez',
-      role: 'Property Manager',
-      rating: 5,
-      content:
-        'They handled our 20-story building with ease. The windows look incredible and the crew was very safety-conscious.',
-      category: 'highrise',
-      date: '2023-09-01',
-    },
-    {
-      id: 4,
-      name: 'David Chen',
-      role: 'Restaurant Owner',
-      rating: 5,
-      content:
-        'Our storefront windows had years of built-up grime. ShineWindows made them look brand new! Customers have commented on the difference.',
-      category: 'commercial',
-      date: '2023-08-05',
-    },
-    {
-      id: 5,
-      name: 'Jennifer Wilson',
-      role: 'Homeowner',
-      rating: 5,
-      content:
-        "I'm extremely impressed with their attention to detail. They even cleaned the window tracks which no other company has done before.",
-      category: 'residential',
-      date: '2023-07-30',
-    },
-    {
-      id: 6,
-      name: 'Robert Kim',
-      role: 'Facility Manager',
-      rating: 5,
-      content:
-        'We schedule quarterly cleanings with ShineWindows. Their maintenance program keeps our building looking professional year-round.',
-      category: 'commercial',
-      date: '2023-08-18',
-    },
-  ];
+interface SanityTestimonial {
+  _id: string;
+  name: string;
+  rating: number;
+  comment: string;
+  location?: string;
+  publishedAt: string;
+  source: string;
+}
 
-  const videoTestimonials = [
-    {
-      id: 1,
-      title: 'Residential Transformation',
-      description: "See how we transformed this homeowner's property",
-    },
-    {
-      id: 2,
-      title: 'Commercial Building Renewal',
-      description: 'Office building restoration in downtown Toronto',
-    },
-    {
-      id: 3,
-      title: 'Pressure Washing Results',
-      description: 'Driveway and deck cleaning process and results',
-    },
-  ];
+export default async function TestimonialsPage(): Promise<React.JSX.Element> {
+  const [googleData, directTestimonials] = await Promise.all([
+    fetchGooglePlaceReviews(),
+    client.fetch<SanityTestimonial[]>(testimonialsQuery),
+  ]);
+
+  const googleReviewUrl = process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL || '#';
+  const orgId = `${SITE_URL}/#organization`;
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Testimonials', item: PAGE_URL },
+    ],
+  };
+
+  // Only emitted when Google returns real numbers — this is the fix for
+  // the fabricated hardcoded "5.0" badge that was on this page before.
+  const aggregateRatingJsonLd =
+    googleData.rating !== null && googleData.userRatingCount !== null && googleData.userRatingCount > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'LocalBusiness',
+          '@id': orgId,
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: googleData.rating,
+            reviewCount: googleData.userRatingCount,
+          },
+        }
+      : null;
 
   return (
-    <TestimonialsClient
-      testimonials={testimonials}
-      videoTestimonials={videoTestimonials}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {aggregateRatingJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aggregateRatingJsonLd) }} />
+      )}
+      <TestimonialsClient
+        googleRating={googleData.rating}
+        googleReviewCount={googleData.userRatingCount}
+        googleReviews={googleData.reviews}
+        googleMapsUrl={googleData.mapsUrl}
+        googleReviewUrl={googleReviewUrl}
+        directTestimonials={directTestimonials ?? []}
+      />
+    </>
   );
 }

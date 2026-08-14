@@ -142,3 +142,9 @@ export const relatedServicesBySlugsQuery = groq`
     icon
   }
 `;
+
+export const testimonialsQuery = groq`
+  *[_type == "testimonial" && published == true] | order(publishedAt desc) {
+    _id, name, rating, comment, location, publishedAt, source
+  }
+`;

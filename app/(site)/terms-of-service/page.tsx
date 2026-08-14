@@ -1,85 +1,120 @@
+// src/app/terms-of-service/page.tsx
 import TermsOfServiceClient from './page.client';
 import type { Metadata } from 'next';
+import { phoneNumber } from '@/lib/constants';
+import LegalLayout from '@/components/legal/LegalLayout';
+import LegalSection from '@/components/legal/LegalSection';
+import { Callout, QuickFacts } from '@/components/legal/Callout';
+
+const SITE_URL = 'https://www.masterpiecehomeservices.ca';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | Shine Windows & Gutters',
+  title: 'Terms of Service | Masterpiece Home Services',
   description:
-    'Read the Terms of Service for Shine Windows. Learn about our service guarantees, cancellation policies, and booking terms.',
-  robots: {
-    index: true,
-    follow: true,
-  },
+    'Read the Terms of Service for Masterpiece Home Services. Learn about our service guarantees, cancellation policies, and booking terms.',
+  alternates: { canonical: `${SITE_URL}/terms-of-service` },
+  robots: { index: true, follow: true },
 };
+
+const TOC = [
+  { id: 'introduction', label: 'Introduction' },
+  { id: 'services', label: 'Services' },
+  { id: 'bookings-payments', label: 'Bookings & Payments' },
+  { id: 'cancellation', label: 'Cancellation Policy' },
+  { id: 'guarantee', label: 'Service Guarantee' },
+  { id: 'liability', label: 'Limitation of Liability' },
+  { id: 'changes', label: 'Changes to Terms' },
+  { id: 'contact', label: 'Contact Us' },
+];
 
 export default function TermsOfServicePage() {
   return (
     <TermsOfServiceClient>
-      <div className="prose prose-blue max-w-none">
-        <h2>Introduction</h2>
-        <p>
-          These Terms of Service (&quot;Terms&quot;) govern your use of the website
-          and services provided by Shine Windows (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
-          By accessing or using our Service, you agree to be bound by these
-          Terms.
-        </p>
+      <LegalLayout title="Terms of Service" lastUpdated="August 13, 2026" toc={TOC}>
+        <QuickFacts
+          facts={[
+            { label: 'Cancellation window', value: '24+ hours notice, no fee' },
+            { label: 'Service guarantee', value: '7 days after completion' },
+            { label: 'Accepted payment', value: 'Interac e-Transfer, credit card, cash' },
+            { label: 'Payment due', value: 'At time of service' },
+          ]}
+        />
 
-        <h2>Services</h2>
-        <p>
-          We provide professional window cleaning and related exterior maintenance
-          services. All services are subject to availability and we reserve the
-          right to refuse service to anyone for any reason at any time.
-        </p>
+        <LegalSection id="introduction" number={1} title="Introduction">
+          <p>
+            These Terms of Service (&quot;Terms&quot;) govern your use of the website and
+            services provided by Masterpiece Home Services (&quot;we&quot;, &quot;us&quot;, or
+            &quot;our&quot;). By accessing or using our Service, you agree to be bound by these
+            Terms.
+          </p>
+        </LegalSection>
 
-        <h2>Bookings and Payments</h2>
-        <p>
-          When you book a service with us, you agree to provide accurate and
-          complete information. Payment is due at the time of service unless
-          otherwise arranged. We accept major credit cards, debit cards, and cash.
-        </p>
+        <LegalSection id="services" number={2} title="Services">
+          <p>
+            We provide professional window detailing, eavestrough clearing, house soft washing,
+            pressure washing, indoor cleaning, and seasonal Christmas light installation. All
+            services are subject to availability.
+          </p>
+        </LegalSection>
 
-        <h2>Cancellation Policy</h2>
-        <p>
-          You may cancel or reschedule your appointment with at least 24 hours
-          notice without penalty. Cancellations with less than 24 hours notice may
-          be subject to a cancellation fee of 50% of the service price.
-        </p>
+        <LegalSection id="bookings-payments" number={3} title="Bookings and Payments">
+          <p>
+            When you book a service with us, you agree to provide accurate and complete
+            information. Payment is due at the time of service unless otherwise arranged. We
+            accept Interac e-Transfer, major credit cards, and cash.
+          </p>
+        </LegalSection>
 
-        <h2>Service Guarantee</h2>
-        <p>
-          We guarantee our work for 7 days following service completion. If
-          you&apos;re not satisfied with any aspect of our service, contact us
-          within 7 days and we&apos;ll return to address the issue at no
-          additional cost.
-        </p>
+        {/* CONFIRM: real cancellation policy before publishing */}
+        <LegalSection id="cancellation" number={4} title="Cancellation Policy">
+          <Callout title="24-hour notice">
+            Cancel or reschedule with at least 24 hours notice at no charge.
+          </Callout>
+          <p>
+            You may cancel or reschedule your appointment with at least 24 hours notice without
+            penalty. Cancellations with less than 24 hours notice may be subject to a
+            cancellation fee.
+          </p>
+        </LegalSection>
 
-        <h2>Limitation of Liability</h2>
-        <p>
-          In no event shall Shine Windows, nor its directors, employees,
-          partners, agents, suppliers, or affiliates, be liable for any indirect,
-          incidental, special, consequential or punitive damages, including
-          without limitation, loss of profits, data, use, goodwill, or other
-          intangible losses, resulting from your access to or use of or inability
-          to access or use the Services.
-        </p>
+        {/* CONFIRM: real guarantee window before publishing */}
+        <LegalSection id="guarantee" number={5} title="Service Guarantee">
+          <Callout title="7-day guarantee">
+            Not satisfied? Contact us within 7 days and we&apos;ll return to fix it at no cost.
+          </Callout>
+          <p>
+            We guarantee our work for 7 days following service completion. If you&apos;re not
+            satisfied with any aspect of our service, contact us within 7 days and we&apos;ll
+            return to address the issue at no additional cost.
+          </p>
+        </LegalSection>
 
-        <h2>Changes to Terms</h2>
-        <p>
-          We reserve the right, at our sole discretion, to modify or replace these
-          Terms at any time. By continuing to access or use our Service after
-          those revisions become effective, you agree to be bound by the revised
-          terms.
-        </p>
+        <LegalSection id="liability" number={6} title="Limitation of Liability">
+          <p>
+            In no event shall Masterpiece Home Services, nor its owner, employees, or affiliates,
+            be liable for any indirect, incidental, special, consequential or punitive damages,
+            including without limitation, loss of profits, data, use, goodwill, or other
+            intangible losses, resulting from your access to or use of or inability to access or
+            use the Services.
+          </p>
+        </LegalSection>
 
-        <h2>Contact Us</h2>
-        <p>
-          If you have any questions about these Terms, please contact us at:
-        </p>
-        <ul>
-          <li>By email: legal@shinewindows.ca</li>
-          <li>By phone: +1 (555) 123-4567</li>
-          <li>By mail: 123 Clean Street, Toronto, ON M1A 1A1</li>
-        </ul>
-      </div>
+        <LegalSection id="changes" number={7} title="Changes to Terms">
+          <p>
+            We reserve the right, at our sole discretion, to modify or replace these Terms at any
+            time. By continuing to use our Service after those revisions become effective, you
+            agree to be bound by the revised terms.
+          </p>
+        </LegalSection>
+
+        <LegalSection id="contact" number={8} title="Contact Us">
+          <p>If you have any questions about these Terms, please contact us at:</p>
+          <ul>
+            <li>By email: [legal@masterpiecehomeservices.ca]</li>
+            <li>By phone: {phoneNumber}</li>
+          </ul>
+        </LegalSection>
+      </LegalLayout>
     </TermsOfServiceClient>
   );
 }

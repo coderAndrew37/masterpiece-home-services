@@ -1,40 +1,88 @@
+// src/app/gallery/page.tsx
 import type { Metadata } from 'next';
-import GalleryClient from './gallery.client';
+import { client } from '@/lib/sanity/client';
+import { homeGalleryQuery } from '@/lib/sanity/queries';
+import GalleryClient, { type GalleryImage } from './page.client';
+
+const SITE_URL = 'https://www.masterpiecehomeservices.ca';
+const PAGE_URL = `${SITE_URL}/gallery`;
 
 export const metadata: Metadata = {
-  title: 'Project Gallery | Window & Exterior Cleaning Portfolio',
+  title: 'Project Gallery | Masterpiece Home Services Kamloops',
   description:
-    'Explore our portfolio of completed residential, commercial, high-rise window cleaning, and pressure washing projects across Ontario.',
+    'See completed window detailing, soft washing, eavestrough clearing, and pressure washing projects from Masterpiece Home Services in Kamloops, BC.',
+  alternates: { canonical: PAGE_URL },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
   openGraph: {
-    title: 'Work Gallery | Shine Windows & Gutters',
-    description:
-      'View real transformations from our commercial and residential exterior cleaning projects.',
+    title: 'Work Gallery | Masterpiece Home Services Kamloops',
+    description: 'Real transformations from our Kamloops exterior and interior cleaning projects.',
+    url: PAGE_URL,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Work Gallery | Masterpiece Home Services Kamloops',
+    description: 'Real transformations from our Kamloops exterior and interior cleaning projects.',
   },
 };
 
-export default function GalleryPage() {
-  const categories = [
-    { id: 'all', name: 'All Work' },
-    { id: 'residential', name: 'Residential' },
-    { id: 'commercial', name: 'Commercial' },
-    { id: 'highrise', name: 'High-Rise' },
-    { id: 'pressure', name: 'Pressure Washing' },
-  ];
+interface SanityGalleryItem {
+  _id: string;
+  title: string;
+  category: string;
+  image: string;
+  alt?: string;
+}
 
-  const images = [
-    { id: 1, category: 'residential', title: 'Modern Home Transformation', src: '/images/residential-1.jpg' },
-    { id: 2, category: 'commercial', title: 'Office Building Restoration', src: '/images/residential-1.jpg' },
-    { id: 3, category: 'highrise', title: 'Downtown Skyscraper', src: '/images/residential-1.jpg' },
-    { id: 4, category: 'residential', title: 'Suburban Home Makeover', src: '/images/residential-1.jpg' },
-    { id: 5, category: 'pressure', title: 'Driveway Renewal', src: '/images/residential-1.jpg' },
-    { id: 6, category: 'commercial', title: 'Retail Storefront', src: '/images/residential-1.jpg' },
-    { id: 7, category: 'residential', title: 'Historic Home Restoration', src: '/images/residential-1.jpg' },
-    { id: 8, category: 'highrise', title: 'Condominium Complex', src: '/images/residential-1.jpg' },
-    { id: 9, category: 'pressure', title: 'Deck Refinishing', src: '/images/residential-1.jpg' },
-    { id: 10, category: 'residential', title: 'Luxury Estate', src: '/images/residential-1.jpg' },
-    { id: 11, category: 'commercial', title: 'Shopping Center', src: '/images/residential-1.jpg' },
-    { id: 12, category: 'pressure', title: 'Building Exterior', src: '/images/residential-1.jpg' },
-  ];
+const categories = [
+  { id: 'all', name: 'All Projects' },
+  { id: 'windows', name: 'Window Detailing' },
+  { id: 'eavestroughs', name: 'Eavestroughs' },
+  { id: 'soft-wash', name: 'Soft Washing' },
+  { id: 'pressure-wash', name: 'Pressure Washing' },
+  { id: 'indoor-cleaning', name: 'Indoor Cleaning' },
+  { id: 'christmas-lights', name: 'Christmas Lights' },
+];
 
-  return <GalleryClient categories={categories} images={images} />;
+export default async function GalleryPage(): Promise<React.JSX.Element> {
+  const items = await client.fetch<SanityGalleryItem[]>(homeGalleryQuery);
+
+  const images: GalleryImage[] = (items ?? []).map((item) => ({
+    id: item._id,
+    category: item.category,
+    title: item.title,
+    src: item.image,
+    alt: item.alt,
+  }));
+
+  const galleryJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${PAGE_URL}#gallery`,
+    url: PAGE_URL,
+    name: 'Project Gallery | Masterpiece Home Services',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    about: { '@id': `${SITE_URL}/#organization` },
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Gallery', item: PAGE_URL },
+    ],
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(galleryJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <GalleryClient categories={categories} images={images} />
+    </>
+  );
 }

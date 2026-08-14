@@ -17,6 +17,8 @@ import { faq } from './faq';
 import { galleryImage } from './GalleryImage';
 import { pricingPlan } from './pricingPlan';
 import { addon } from './addon';
+import { testimonial } from './testimonial';
+import {feedback } from './feedback'
 
 export const schema: {types: SchemaTypeDefinition[]} = {
   types: [
@@ -36,6 +38,8 @@ export const schema: {types: SchemaTypeDefinition[]} = {
     pricingPlan,
     addon,
     serviceArea,
+    testimonial,
+    feedback,
   ],
 }
 

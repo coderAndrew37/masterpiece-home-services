@@ -1,3 +1,4 @@
+// src/app/about/page.client.tsx
 'use client';
 
 import PageTransition from '@/components/PageTransition';
@@ -6,7 +7,6 @@ import HistoryTimeline from '@/components/HistoryTimeline';
 import ValuesSection from '@/components/ValuesSection';
 import CtaBanner from '@/components/CtaBanner';
 
-// TypeScript interfaces for props
 interface TeamMember {
   id: number;
   name: string;
@@ -36,15 +36,15 @@ export default function AboutClient({
   teamMembers,
   timelineEvents,
   values,
-}: AboutClientProps) {
+}: AboutClientProps): React.JSX.Element {
   return (
     <PageTransition>
       <div className="bg-blue-900 py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          About Shine Windows
+          About Masterpiece Home Services
         </h1>
         <p className="text-xl text-blue-200 max-w-3xl mx-auto">
-          Professional window cleaning services you can trust since 2010
+          A small, hands-on home care team, built in Kamloops.
         </p>
       </div>
 
@@ -52,34 +52,30 @@ export default function AboutClient({
         <div className="max-w-4xl mx-auto text-center mb-16">
           <h2 className="text-3xl font-bold text-blue-900 mb-6">Our Story</h2>
           <p className="text-gray-700 text-lg mb-6">
-            Founded in 2010 by Michael Johnson, Shine Windows began with a
-            simple mission: to provide exceptional window cleaning services with
-            unmatched attention to detail. What started as a one-man operation
-            has grown into a team of 25 dedicated professionals serving
-            residential and commercial clients across Ontario.
+            Masterpiece Home Services started in 2025, right here in Kamloops, BC. It began small
+            &mdash; and it&apos;s still small today: our founder and one dedicated technician handle
+            every job personally. When the schedule fills up, we bring in trusted local partners
+            to keep turnaround times fast without cutting corners.
           </p>
           <p className="text-gray-700 text-lg">
-            Today, we&apos;re proud to be one of the most trusted window cleaning
-            companies in the region, known for our reliability, professionalism,
-            and commitment to customer satisfaction. We continue to innovate
-            while staying true to our core values of excellence, integrity, and
-            environmental responsibility.
+            We officially registered the business in August 2026 as we started building toward
+            something bigger. As we grow, we&apos;re looking forward to hiring more Kamloops-based
+            technicians and expanding what we can offer &mdash; but the goal that started this
+            business hasn&apos;t changed: careful, honest work on every property we touch.
           </p>
         </div>
 
         <HistoryTimeline events={timelineEvents} />
 
-        <ValuesSection title="Our Core Values" values={values} />
+        <ValuesSection title="What We Care About" values={values} />
 
-        <TeamSection
-          title="Meet Our Leadership Team"
-          teamMembers={teamMembers}
-        />
+        <TeamSection title="Who You'll Work With" teamMembers={teamMembers} />
 
         <CtaBanner
-          title="Experience the Shine Windows Difference"
-          description="Join thousands of satisfied customers who trust us with their properties"
-          buttonText="Schedule Service"
+          tagline="Kamloops & Surrounding Areas"
+          title="Ready to Work With a Team That Cares?"
+          description="Book your free estimate and see the hands-on difference of working with a small, local team."
+          buttonText="Get Your Free Quote"
         />
       </div>
     </PageTransition>

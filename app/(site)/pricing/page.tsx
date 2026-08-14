@@ -88,6 +88,8 @@ export default async function PricingPage(): Promise<React.JSX.Element> {
     console.error('Failed to fetch pricing page from Sanity, falling back to static data:', error);
   }
 
+  const orgId = `${SITE_URL}/#organization`;
+
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -97,12 +99,50 @@ export default async function PricingPage(): Promise<React.JSX.Element> {
     ],
   };
 
+  // Only emitted when real FAQ content exists — never render FAQPage schema
+  // against an empty mainEntity array.
+  const faqJsonLd =
+    data.faqs.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: data.faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+          })),
+        }
+      : null;
+
+  // Ties this page's pricing catalog back to the canonical Organization
+  // node from the homepage rather than redeclaring it — same pattern used
+  // on every schema block across the site.
+  const pricingPageJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${PAGE_URL}#pricing`,
+    url: PAGE_URL,
+    name: 'Pricing & Free Estimates | Masterpiece Home Services',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    about: { '@id': orgId },
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingPageJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
       <PricingClient
         residentialPricing={data.residentialPricing}
         commercialPricing={data.commercialPricing}
