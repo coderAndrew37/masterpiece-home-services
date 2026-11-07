@@ -5,7 +5,7 @@ import {schema} from './schemaTypes'
 import { structure } from './schemaTypes/structure';
 
 // These two env vars are required — get them from sanity.io/manage
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!
+export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
 
 export default defineConfig({
