@@ -22,7 +22,10 @@ export default function ServiceDetail({ service }: ServiceDetailProps): React.JS
     if (typeof service.cardImage === 'string') return service.cardImage;
 
     try {
-      return urlFor(service.cardImage).width(700).height(500).auto('format').url();
+      const imageUrlBuilder = urlFor(
+        service.cardImage as unknown as Parameters<typeof urlFor>[0],
+      );
+      return imageUrlBuilder?.width(700).height(500).auto('format').url() || '/images/residential-1.jpg';
     } catch {
       return '/images/residential-1.jpg';
     }

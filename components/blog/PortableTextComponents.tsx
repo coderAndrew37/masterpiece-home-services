@@ -1,14 +1,71 @@
-'use client';
-
 import { urlFor } from '@/lib/sanity/client';
 import type { PortableTextComponents } from '@portabletext/react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { FiArrowRight, FiChevronDown } from 'react-icons/fi';
+import { FiArrowRight, FiChevronDown, FiCheckCircle } from 'react-icons/fi';
 
-// FaqBlockRenderer — drop the boxed card, use a plain section with a top rule
+// --- NEW: Key Takeaways Renderer (AEO) ---
+function KeyTakeawaysRenderer({
+  title = 'Key Takeaways',
+  items,
+}: {
+  title?: string;
+  items: string[];
+}) {
+  if (!items?.length) return null;
+
+  return (
+    <div className="my-8 rounded-2xl bg-slate-50 border border-slate-200 p-6 sm:p-8">
+      <h3 className="text-xl font-extrabold text-slate-900 mb-4 tracking-tight">{title}</h3>
+      <ul className="space-y-3">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-start gap-3">
+            <FiCheckCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+            <span className="text-slate-700 text-base leading-relaxed">{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// --- NEW: Inline Post Link Renderer (Deep Interlinking) ---
+type InlinePostLinkValue = {
+  customText?: string;
+  post?: {
+    title?: string;
+    slug?: {
+      current?: string;
+    };
+  };
+};
+
+function InlinePostLinkRenderer({
+  value,
+  children,
+}: {
+  value?: InlinePostLinkValue;
+  children: React.ReactNode;
+}) {
+  if (!value?.post?.slug?.current) {
+    return <span className="font-semibold text-slate-900">{children}</span>;
+  }
+
+  const linkText = value.customText || `our guide on ${value.post.title}`;
+
+  return (
+    <Link
+      href={`/blog/${value.post.slug.current}`}
+      className="inline-flex items-center gap-1.5 text-blue-700 font-semibold hover:text-blue-800 underline decoration-blue-300 underline-offset-4 transition-colors"
+    >
+      <span>{linkText}</span>
+      <FiArrowRight className="w-3.5 h-3.5" />
+    </Link>
+  );
+}
+
 function FaqBlockRenderer({
   heading,
   items,
@@ -139,7 +196,7 @@ function CtaBlockRenderer({
           {body}
         </p>
       )}
-<a      
+      <a
         href={buttonHref}
         className={`inline-flex items-center gap-2 font-extrabold py-3 px-6 rounded-2xl text-sm transition-all ${
           resolvedStyle === 'light'
@@ -202,7 +259,7 @@ export const portableTextComponents: PortableTextComponents = {
       }
 
       return (
-  <a      
+        <a
           href={value.href}
           target={target}
           rel={rel}
@@ -212,28 +269,33 @@ export const portableTextComponents: PortableTextComponents = {
         </a>
       );
     },
+    inlinePostLink: ({ value, children }) => (
+      <InlinePostLinkRenderer value={value}>{children}</InlinePostLinkRenderer>
+    ),
   },
   types: {
-    // image renderer — replace existing block
-image: ({ value }) => {
-  if (!value?.asset) return null;
-  return (
-    <figure className="my-8">
-      <span className="block relative w-full h-72 sm:h-96 rounded-2xl overflow-hidden">
-        <Image
-          src={urlFor(value).width(1200).height(800).url()}
-          alt={value.alt || ''}
-          fill
-          sizes="(max-width: 768px) 100vw, 700px"
-          className="object-cover"
-        />
-      </span>
-      {value.caption && (
-        <figcaption className="text-xs text-slate-500 mt-2 italic">{value.caption}</figcaption>
-      )}
-    </figure>
-  );
-},
+    image: ({ value }) => {
+      if (!value?.asset) return null;
+      const imageUrl = urlFor(value)?.width(1200).height(800).url();
+      if (!imageUrl) return null;
+
+      return (
+        <figure className="my-8">
+          <span className="block relative w-full h-72 sm:h-96 rounded-2xl overflow-hidden">
+            <Image
+              src={imageUrl}
+              alt={value.alt || ''}
+              fill
+              sizes="(max-width: 768px) 100vw, 700px"
+              className="object-cover"
+            />
+          </span>
+          {value.caption && (
+            <figcaption className="text-xs text-slate-500 mt-2 italic">{value.caption}</figcaption>
+          )}
+        </figure>
+      );
+    },
     tableBlock: ({ value }) => (
       <TableBlockRenderer caption={value.caption} hasHeaderRow={value.hasHeaderRow} rows={value.rows} />
     ),
@@ -249,5 +311,9 @@ image: ({ value }) => {
     ),
 
     faqBlock: ({ value }) => <FaqBlockRenderer heading={value.heading} items={value.items} />,
+
+    keyTakeaways: ({ value }) => (
+      <KeyTakeawaysRenderer title={value.title} items={value.items} />
+    ),
   },
 };

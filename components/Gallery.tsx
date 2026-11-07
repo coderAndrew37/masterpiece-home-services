@@ -35,7 +35,8 @@ const Gallery: React.FC<GalleryProps> = ({ items }) => {
     if (typeof item.image === 'string') return item.image;
 
     // Otherwise pass the image object/reference through Sanity URL builder
-    return urlFor(item.image).width(width).auto('format').url();
+    const imageUrl = urlFor(item.image as Parameters<typeof urlFor>[0]);
+    return imageUrl?.width(width).auto('format').url() ?? '/images/residential-1.jpg';
   };
 
   return (

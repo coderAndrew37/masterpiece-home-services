@@ -10,6 +10,7 @@ const postCardProjection = groq`{
   publishedAt,
   readingTime,
   noIndex,
+  primaryKeyword,
   "author": author->{ name, "slug": slug.current, image },
   "categories": categories[]->{ title, "slug": slug.current }
 }`;
@@ -34,8 +35,15 @@ export const postBySlugQuery = groq`
     "slug": slug.current,
     excerpt,
     mainImage,
-    body,
-    faqs,
+    body[]{
+      ...,
+      markDefs[]{
+        ...,
+        _type == "inlinePostLink" => {
+          "post": post->{ title, "slug": slug.current }
+        }
+      }
+    },
     publishedAt,
     updatedAt,
     readingTime,
@@ -44,6 +52,9 @@ export const postBySlugQuery = groq`
     seoTitle,
     seoDescription,
     seoImage,
+    aeoQuickAnswer,
+    primaryKeyword,
+    semanticKeywords,
     "author": author->{ name, "slug": slug.current, image, role, bio },
     "categories": categories[]->{ title, "slug": slug.current },
     "relatedServiceSlugs": relatedServices[]->slug.current,
@@ -59,8 +70,6 @@ export const relatedPostsQuery = groq`
   ${postCardProjection}
 `;
 
-// Homepage "Our Work Gallery" section — fetches all individual 
-// gallery items ordered by newest first.
 export const homeGalleryQuery = groq`
   *[_type == "homeGalleryItem"] | order(_createdAt desc) {
     _id,
@@ -121,7 +130,6 @@ export const serviceAreaSlugsQuery = /* groq */ `
 *[_type == "serviceArea" && published == true].slug.current
 `;
 
-// Sidebar "Latest News" list — excludes the post currently being viewed.
 export const sidebarPostsQuery = groq`
   *[_type == "post" && slug.current != $slug] | order(publishedAt desc)[0...5] ${postCardProjection}
 `;

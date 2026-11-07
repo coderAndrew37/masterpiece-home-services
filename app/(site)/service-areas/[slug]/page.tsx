@@ -107,7 +107,17 @@ export default async function ServiceAreaDetailPage({
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src={area.heroImage ? urlFor(area.heroImage).auto('format').url() : '/images/residential-1.jpg'}
+            src={
+              area.heroImage?.asset?._ref
+                ? urlFor({
+                    ...area.heroImage,
+                    asset: {
+                      ...area.heroImage.asset,
+                      _type: area.heroImage.asset._type ?? 'reference',
+                    },
+                  })?.auto('format').url() ?? '/images/residential-1.jpg'
+                : '/images/residential-1.jpg'
+            }
             alt={area.heroImage?.alt || `${area.name} Kamloops`}
             fill
             priority

@@ -1,9 +1,5 @@
 import {defineArrayMember, defineType} from 'sanity'
 
-/**
- * Standard portable-text config.
- * Used anywhere we want rich text instead of a plain string/array of strings.
- */
 export const blockContent = defineType({
   title: 'Block Content',
   name: 'blockContent',
@@ -51,6 +47,27 @@ export const blockContent = defineType({
               },
             ],
           },
+          // --- NEW: Inline Post Link for deep interlinking ---
+          {
+            title: 'Inline Article Link',
+            name: 'inlinePostLink',
+            type: 'object',
+            fields: [
+              {
+                name: 'post',
+                title: 'Linked Post',
+                type: 'reference',
+                to: [{type: 'post'}],
+                validation: (Rule) => Rule.required(),
+              },
+              {
+                name: 'customText',
+                title: 'Custom Link Text (Optional)',
+                type: 'string',
+                description: 'Override the post title, e.g. "our guide on gutter guards"',
+              },
+            ],
+          },
         ],
       },
     }),
@@ -67,6 +84,31 @@ export const blockContent = defineType({
           description: 'Important for SEO and accessibility.',
         },
       ],
+    }),
+
+    // --- NEW: AEO Key Takeaways ---
+    defineArrayMember({
+      type: 'object',
+      name: 'keyTakeaways',
+      title: 'Key Takeaways (AEO)',
+      fields: [
+        {
+          name: 'title',
+          title: 'Title',
+          type: 'string',
+          initialValue: 'Key Takeaways',
+        },
+        {
+          name: 'items',
+          title: 'Takeaway Points',
+          type: 'array',
+          of: [{type: 'string'}],
+          validation: (Rule) => Rule.min(2).max(5),
+        },
+      ],
+      preview: {
+        prepare() { return {title: 'Key Takeaways Block'} }
+      }
     }),
 
     // --- Inline Table ---

@@ -5,15 +5,29 @@ import type { Image as SanityImageType } from "sanity";
  * Sanity's base `Image` type only knows about `asset`, `hotspot`, and `crop`.
  * Our schema adds custom `alt` and `caption` fields inside the image's
  * `fields: [...]` array, so we extend the base type to describe them.
- * Without this, `mainImage.alt` / `mainImage.caption` resolve to `unknown`
- * and React refuses to render them (TS2322).
  */
 export interface SanityImageWithMeta extends SanityImageType {
   alt?: string;
   caption?: string;
 }
 
-export interface PostCard {
+// --- Shared Author Type ---
+export interface PostAuthor {
+  name: string;
+  slug: string;
+  image?: SanityImageWithMeta;
+}
+
+// --- Shared SEO / AEO Fields ---
+interface PostSeoFields {
+  noIndex?: boolean;
+  primaryKeyword?: string;
+  semanticKeywords?: string[];
+  aeoQuickAnswer?: string;
+}
+
+// --- Card Data (List Views) ---
+export interface PostCard extends PostSeoFields {
   _id: string;
   title: string;
   slug: string;
@@ -21,25 +35,22 @@ export interface PostCard {
   mainImage: SanityImageWithMeta;
   publishedAt: string;
   readingTime?: number;
-  author: {
-    name: string;
-    slug: string;
-    image?: SanityImageWithMeta;
-  };
+  author: PostAuthor;
   categories: { title: string; slug: string }[];
 }
 
-export interface PostDetail extends Omit<PostCard, "author"> {
+// --- Detail Data (Single Post View) ---
+export interface PostDetail extends PostCard {
   body: PortableTextBlock[];
   tags?: string[];
+  updatedAt?: string;
   seoTitle?: string;
   seoDescription?: string;
   seoImage?: SanityImageWithMeta;
   relatedServiceSlugs?: string[];
-  author: PostCard["author"] & {
+  relatedServiceAreaSlugs?: string[];
+  author: PostAuthor & {
     role?: string;
     bio?: string;
   };
-  updatedAt?: string;
-  noIndex?: boolean;
 }

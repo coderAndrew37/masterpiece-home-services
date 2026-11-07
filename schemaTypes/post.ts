@@ -9,7 +9,7 @@ export const post = defineType({
   groups: [
     {name: 'content', title: 'Content', default: true},
     {name: 'meta', title: 'Meta & Organization'},
-    {name: 'seo', title: 'SEO'},
+    {name: 'seo', title: 'SEO & AEO'},
   ],
   fields: [
     // --- Content ---
@@ -63,18 +63,8 @@ export const post = defineType({
           type: 'image',
           options: {hotspot: true},
           fields: [
-            {
-              name: 'alt',
-              type: 'string',
-              title: 'Alternative text',
-              description: 'Important for SEO and accessibility.',
-            },
-            {
-              name: 'caption',
-              type: 'string',
-              title: 'Caption (optional)',
-              description: 'Shown below the image in the article body.',
-            },
+            {name: 'alt', type: 'string', title: 'Alternative text', description: 'Important for SEO and accessibility.'},
+            {name: 'caption', type: 'string', title: 'Caption (optional)', description: 'Shown below the image in the article body.'},
           ],
         }),
       ],
@@ -85,7 +75,7 @@ export const post = defineType({
       name: 'body',
       title: 'Body',
       type: 'blockContent',
-      description: 'Insert tables, CTAs, and FAQ groups directly using the toolbar buttons.',
+      description: 'Insert tables, CTAs, Key Takeaways, and FAQ groups directly using the toolbar buttons.',
       validation: (Rule) => Rule.required(),
       group: 'content',
     }),
@@ -161,7 +151,31 @@ export const post = defineType({
       group: 'meta',
     }),
 
-    // --- SEO ---
+    // --- SEO & AEO ---
+    defineField({
+      name: 'primaryKeyword',
+      title: 'Primary Keyword',
+      type: 'string',
+      description: 'E.g. "window cleaning Victoria BC". Used to prevent cannibalization.',
+      group: 'seo',
+    }),
+    defineField({
+      name: 'semanticKeywords',
+      title: 'Semantic / LSI Keywords',
+      type: 'array',
+      of: [{type: 'string'}],
+      options: {layout: 'tags'},
+      description: 'Related terms AI should associate with this article (e.g. "window washers", "squeegee", "hard water stains").',
+      group: 'seo',
+    }),
+    defineField({
+      name: 'aeoQuickAnswer',
+      title: 'AEO Quick Answer',
+      type: 'text',
+      rows: 3,
+      description: 'A 40-50 word direct answer to the post title. Used by AI Overviews and voice search.',
+      group: 'seo',
+    }),
     defineField({
       name: 'seoTitle',
       title: 'SEO Title',

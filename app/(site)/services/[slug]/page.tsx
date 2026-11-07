@@ -32,7 +32,9 @@ const getImageUrl = (imageSource: unknown, fallbackUrl = '/images/residential-1.
   if (typeof imageSource === 'string') return imageSource;
 
   try {
-    return urlFor(imageSource).auto('format').url();
+    return (
+      urlFor(imageSource as Parameters<typeof urlFor>[0])?.auto('format').url() ?? fallbackUrl
+    );
   } catch {
     return fallbackUrl;
   }
@@ -55,7 +57,7 @@ export async function generateMetadata({
 
   const heroImg = service.heroImage ?? service.cardImage;
   const ogImageUrl = heroImg
-    ? urlFor(heroImg).width(1200).height(630).auto('format').url()
+    ? urlFor(heroImg as Parameters<typeof urlFor>[0])?.width(1200).height(630).auto('format').url() ?? '/images/residential-1.jpg'
     : '/images/residential-1.jpg';
 const canonicalUrl = `${SITE_URL}/services/${slug}`;
 const description = service.seoDescription ?? service.subtitle;

@@ -1,3 +1,6 @@
+// src/components/blog/AuthorCard.tsx
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
 import { urlFor } from '@/lib/sanity/client';
@@ -7,17 +10,22 @@ interface AuthorCardProps {
   author: PostDetail['author'];
 }
 
-export default function AuthorCard({ author }: AuthorCardProps): React.JSX.Element {
+export default function AuthorCard({ author }: AuthorCardProps): React.JSX.Element | null {
+  if (!author) return null;
+
+  // Safely get author avatar URL with strict typing
+  const authorImageUrl = author.image ? urlFor(author.image)?.width(112).height(112).url() : null;
+
   return (
     <div className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-sm">
       <span className="text-xs font-bold text-blue-700 uppercase tracking-widest block mb-4">
         Written By
       </span>
       <div className="flex items-center gap-4">
-        {author.image ? (
+        {authorImageUrl ? (
           <div className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-200">
             <Image
-              src={urlFor(author.image).width(112).height(112).url()}
+              src={authorImageUrl}
               alt={author.name}
               fill
               className="object-cover"

@@ -21,8 +21,9 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps): React.JSX.
   });
 
   // Safely construct the image URL or fallback to a default local asset
-  const imageUrl = post.mainImage?.asset
-    ? urlFor(post.mainImage).width(700).height(450).url()
+  const mainImage = post.mainImage;
+  const imageUrl = mainImage && mainImage.asset
+    ? urlFor(mainImage)?.width(700).height(450).url() ?? '/images/residential-1.jpg'
     : '/images/residential-1.jpg';
 
   return (

@@ -9,6 +9,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { urlFor } from '@/lib/sanity/client';
 import { getServiceIcon } from '@/lib/ServiceIcons';
 import type { ServiceItem } from '@/types/service';
+import type { SanityImageWithMeta } from '@/types/blog';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,17 +33,23 @@ interface ServicePlatformsProps {
 export default function ServicePlatforms({ services }: ServicePlatformsProps): React.ReactElement {
   if (!services || !services.length) return <></>;
 
-  // Helper to safely extract image URL or fall back to a placeholder
+  // Helper to safely extract image URL or fall back to a placeholder without using `any`
   const getImageUrl = (service: ServiceItem): string => {
-    if (!service.cardImage) return '/images/residential-1.jpg'; // Local fallback asset
-    
+    const fallback = '/images/residential-1.jpg';
+    const cardImage = service.cardImage as SanityImageWithMeta | string | undefined;
+
+    if (!cardImage) return fallback;
+
     // Handle string URLs if GROQ expanded the asset
-    if (typeof service.cardImage === 'string') return service.cardImage;
-    
+    if (typeof cardImage === 'string') return cardImage;
+
     try {
-      return urlFor(service.cardImage).width(600).height(700).auto('format').url();
+      if (!cardImage.asset) return fallback;
+
+      const imageUrl = urlFor(cardImage)?.width(600).height(700).auto('format').url();
+      return imageUrl || fallback;
     } catch {
-      return '/images/residential-1.jpg';
+      return fallback;
     }
   };
 
@@ -78,7 +85,8 @@ export default function ServicePlatforms({ services }: ServicePlatformsProps): R
         >
           {services.map((service, index) => {
             const imageUrl = getImageUrl(service);
-            const altText = service.cardImage?.alt || service.title || 'Service image';
+            const cardImgObj = service.cardImage as SanityImageWithMeta | undefined;
+            const altText = cardImgObj?.alt || service.title || 'Service image';
 
             return (
               <motion.div key={service._id || `service-${index}`} variants={cardVariants}>

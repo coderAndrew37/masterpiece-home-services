@@ -42,6 +42,7 @@ export default function BlogDetailClient({
   const updatedDate = post.updatedAt
     ? new Date(post.updatedAt).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
     : null;
+  const mainImageUrl = urlFor(post.mainImage)?.width(1600).height(900).url();
 
   const ctaDescription =
     relatedServices.length > 0
@@ -97,18 +98,20 @@ export default function BlogDetailClient({
       <section className="bg-white pb-4">
         <div className="container mx-auto px-4 max-w-4xl">
           <figure>
-            <div className="relative w-full h-72 sm:h-[26rem] rounded-2xl overflow-hidden">
-              <Image
-                src={urlFor(post.mainImage).width(1600).height(900).url()}
-                alt={typeof post.mainImage?.alt === 'string' ? post.mainImage.alt : post.title}
-                fill
-                priority
-                quality={85}
-                sizes="(max-width: 768px) 100vw, 896px"
-                className="object-cover"
-                unoptimized
-              />
-            </div>
+            {mainImageUrl && (
+              <div className="relative w-full h-72 sm:h-[26rem] rounded-2xl overflow-hidden">
+                <Image
+                  src={mainImageUrl}
+                  alt={typeof post.mainImage?.alt === 'string' ? post.mainImage.alt : post.title}
+                  fill
+                  priority
+                  quality={85}
+                  sizes="(max-width: 768px) 100vw, 896px"
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            )}
             {post.mainImage?.caption && (
               <figcaption className="text-xs text-slate-500 mt-2 italic">{post.mainImage.caption}</figcaption>
             )}

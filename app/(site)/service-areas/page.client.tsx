@@ -43,7 +43,12 @@ export default function ServiceAreasClient({ areas }: ServiceAreasClientProps): 
                 className="group block relative h-56 rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl transition-all"
               >
                 <Image
-                  src={area.heroImage ? urlFor(area.heroImage).width(600).height(400).auto('format').url() : '/images/residential-1.jpg'}
+                  src={area.heroImage
+                    ? urlFor({
+                        ...area.heroImage,
+                        asset: { ...area.heroImage.asset, _type: area.heroImage.asset._type ?? 'reference' },
+                      })?.width(600).height(400).auto('format').url() ?? '/images/residential-1.jpg'
+                    : '/images/residential-1.jpg'}
                   alt={area.heroImage?.alt || `${area.name} service area`}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
