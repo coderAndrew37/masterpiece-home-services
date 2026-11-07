@@ -52,13 +52,18 @@ export async function generateMetadata({
   const title = post.seoTitle || post.title;
   const description = post.seoDescription || post.aeoQuickAnswer || post.excerpt;
   const imageSource = post.seoImage || post.mainImage;
-  const ogImageUrl = imageSource ? urlFor(imageSource)?.width(1200).height(630).url() : undefined;
+  
+  // Safe check for metadata image URL
+  const ogImageUrl = imageSource && imageSource.asset
+    ? urlFor(imageSource)?.width(1200).height(630).url()
+    : undefined;
+
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
 
   return {
     title: `${title} | Masterpiece Blog`,
     description,
-    keywords: post.semanticKeywords, // Pass semantic keywords to metadata
+    keywords: post.semanticKeywords,
     alternates: { canonical: postUrl },
     robots: post.noIndex
       ? { index: false, follow: true }
@@ -111,6 +116,11 @@ export default async function BlogDetailPage({
   const postUrl = `${SITE_URL}/blog/${post.slug}`;
   const faqs = extractFaqs(post.body);
 
+  // Safe check for schema JSON-LD image URL
+  const articleImageUrl = post.mainImage && post.mainImage.asset 
+    ? urlFor(post.mainImage)?.width(1200).height(630).url() 
+    : undefined;
+
   // --- Enhanced Article JSON-LD for SEO & AEO ---
   const articleJsonLd = {
     '@context': 'https://schema.org',
@@ -118,9 +128,9 @@ export default async function BlogDetailPage({
     '@id': `${postUrl}#article`,
     headline: post.title,
     description: post.aeoQuickAnswer || post.seoDescription || post.excerpt,
-    abstract: post.aeoQuickAnswer, // Specifically targets AI Search
+    abstract: post.aeoQuickAnswer,
     keywords: [post.primaryKeyword, ...(post.semanticKeywords || [])].filter(Boolean).join(', '),
-    image: post.mainImage ? urlFor(post.mainImage)?.width(1200).height(630).url() : undefined,
+    image: articleImageUrl,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     author: post.author ? { '@type': 'Person', name: post.author.name } : undefined,
