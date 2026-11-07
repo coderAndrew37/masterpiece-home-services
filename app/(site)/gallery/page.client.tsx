@@ -1,7 +1,7 @@
-// src/app/gallery/page.client.tsx (renamed from gallery.client.tsx)
+// app/(site)/gallery/page.client.tsx
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import PageTransition from '@/components/PageTransition';
 import CtaBanner from '@/components/CtaBanner';
@@ -48,11 +48,17 @@ export default function GalleryClient({
   const [visibleCount, setVisibleCount] = useState<number>(INITIAL_VISIBLE_COUNT);
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
 
-  const filteredImages =
-    selectedCategory === 'all' ? images : images.filter((image) => image.category === selectedCategory);
+  // Filter out any items with empty or missing src strings
+  const validImages = images.filter((image) => Boolean(image.src && image.src.trim() !== ''));
 
+  const filteredImages =
+    selectedCategory === 'all'
+      ? validImages
+      : validImages.filter((image) => image.category === selectedCategory);
+
+  const total = filteredImages.length;
   const displayedImages = filteredImages.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredImages.length;
+  const hasMore = visibleCount < total;
   const activeImage = activeImageIndex !== null ? filteredImages[activeImageIndex] : null;
 
   const handleCategorySelect = (categoryId: string) => {
@@ -63,26 +69,33 @@ export default function GalleryClient({
 
   const handleLoadMore = () => setVisibleCount((prev) => prev + BATCH_LOAD_COUNT);
 
-  const handlePrev = useCallback(() => {
-    if (activeImageIndex === null) return;
-    setActiveImageIndex((prev) => (prev === 0 ? filteredImages.length - 1 : (prev as number) - 1));
-  }, [activeImageIndex, filteredImages.length]);
+  // No useCallback: React Compiler memoizes these automatically.
+  const handlePrev = () => {
+    setActiveImageIndex((prev) => {
+      if (prev === null || total === 0) return prev;
+      return prev === 0 ? total - 1 : prev - 1;
+    });
+  };
 
-  const handleNext = useCallback(() => {
-    if (activeImageIndex === null) return;
-    setActiveImageIndex((prev) => (prev === filteredImages.length - 1 ? 0 : (prev as number) + 1));
-  }, [activeImageIndex, filteredImages.length]);
+  const handleNext = () => {
+    setActiveImageIndex((prev) => {
+      if (prev === null || total === 0) return prev;
+      return prev === total - 1 ? 0 : prev + 1;
+    });
+  };
 
   useEffect(() => {
+    if (activeImageIndex === null) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (activeImageIndex === null) return;
       if (e.key === 'Escape') setActiveImageIndex(null);
       if (e.key === 'ArrowLeft') handlePrev();
       if (e.key === 'ArrowRight') handleNext();
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeImageIndex, handleNext, handlePrev]);
+  }, [activeImageIndex, handlePrev, handleNext]);
 
   return (
     <PageTransition>
@@ -125,11 +138,14 @@ export default function GalleryClient({
 
       <section className="py-16 bg-slate-50 min-h-[600px]">
         <div className="container mx-auto px-4 max-w-7xl">
-          {images.length === 0 ? (
+          {validImages.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-slate-500 font-semibold">
-                We&apos;re just getting started \u2014 project photos coming soon. Check back shortly, or see our{' '}
-                <Link href="/services" className="text-blue-700 underline">services</Link> in the meantime.
+                We&apos;re just getting started — project photos coming soon. Check back shortly, or see our{' '}
+                <Link href="/services" className="text-blue-700 underline">
+                  services
+                </Link>{' '}
+                in the meantime.
               </p>
             </div>
           ) : (
@@ -158,11 +174,12 @@ export default function GalleryClient({
               <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 <AnimatePresence>
                   {displayedImages.map((image, index) => {
-                    const categoryLabel = categories.find((c) => c.id === image.category)?.name || 'Service';
+                    const categoryLabel =
+                      categories.find((c) => c.id === image.category)?.name || 'Service';
 
                     return (
                       <motion.div
-                        key={image.id}
+                        key={image.id || `gallery-item-${index}`}
                         layout
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -214,7 +231,7 @@ export default function GalleryClient({
                     className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 py-4 rounded-full text-sm shadow-xl transition-all"
                   >
                     <FiPlus className="w-4 h-4 text-blue-400" />
-                    <span>Load More Projects ({filteredImages.length - visibleCount} remaining)</span>
+                    <span>Load More Projects ({total - visibleCount} remaining)</span>
                   </motion.button>
                 </div>
               )}
@@ -224,7 +241,7 @@ export default function GalleryClient({
       </section>
 
       <AnimatePresence>
-        {activeImage && activeImageIndex !== null && (
+        {activeImage && activeImage.src && activeImageIndex !== null && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -277,14 +294,13 @@ export default function GalleryClient({
                   priority
                   className="object-contain object-center"
                   unoptimized
-                  
                 />
               </div>
 
               <div className="p-6 bg-slate-900 border-t border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block mb-1">
-                    {categories.find((c) => c.id === activeImage.category)?.name}
+                    {categories.find((c) => c.id === activeImage.category)?.name ?? 'Service'}
                   </span>
                   <h3 className="text-xl font-bold text-white">{activeImage.title}</h3>
                   {activeImage.location && (
@@ -293,7 +309,7 @@ export default function GalleryClient({
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
- <a                 
+                  <a
                     href={phoneTel}
                     className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-600 text-white font-bold px-5 py-3 rounded-xl text-sm transition-all shadow-lg shadow-blue-700/30"
                   >

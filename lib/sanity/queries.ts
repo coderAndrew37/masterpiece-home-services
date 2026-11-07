@@ -40,7 +40,8 @@ export const postBySlugQuery = groq`
       markDefs[]{
         ...,
         _type == "inlinePostLink" => {
-          "post": post->{ title, "slug": slug.current }
+          // Pass the whole slug object so the React component can read slug.current.
+          "post": post->{ title, slug }
         }
       }
     },

@@ -1,5 +1,14 @@
 import type { Viewport } from "next";
+import { Roboto } from "next/font/google";
 import "./globals.css";
+
+// Import Roboto and assign it to a CSS variable
+const roboto = Roboto({
+  weight: ['400', '500', '700', '900'],
+  subsets: ["latin"],
+  variable: "--font-roboto",
+  display: 'swap',
+});
 
 /**
  * Deliberately minimal. This wraps EVERY route, including /studio, so it
@@ -27,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`scroll-smooth ${roboto.variable}`}>
       <body className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col selection:bg-blue-700 selection:text-white">
         {children}
       </body>

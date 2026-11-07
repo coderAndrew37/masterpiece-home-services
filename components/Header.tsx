@@ -9,6 +9,7 @@ import { Sparkles } from "lucide-react";
 import { phoneTel, phoneNumber } from "@/lib/constants";
 import Image from "next/image";
 import QuoteModal from "./NavQuoteModal";
+import ThemeToggle from "./ThemeToggle";
 
 interface NavLink {
   name: string;
@@ -47,11 +48,12 @@ export default function Header(): React.JSX.Element {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-md shadow-md py-3 border-b border-slate-100"
-            : "bg-gradient-to-b from-slate-900/40 via-slate-900/10 to-transparent py-5"
+            ? "bg-surface/95 backdrop-blur-md shadow-sm border-b border-border py-3"
+            : "bg-gradient-to-b from-black/50 via-black/20 to-transparent py-5"
         }`}
       >
         <div className="container mx-auto px-4 max-w-7xl flex items-center justify-between gap-4">
+          
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
             <div className="relative w-10 h-10 shrink-0">
@@ -66,14 +68,14 @@ export default function Header(): React.JSX.Element {
             <div className="flex flex-col">
               <span
                 className={`text-xl font-black tracking-tight leading-none transition-colors ${
-                  scrolled ? "text-slate-900" : "text-white md:text-slate-900 lg:text-white drop-shadow-sm"
+                  scrolled ? "text-foreground" : "text-white drop-shadow-sm"
                 }`}
               >
                 MASTERPIECE
               </span>
               <span
                 className={`text-[10px] font-bold tracking-widest uppercase ${
-                  scrolled ? "text-blue-700" : "text-blue-200 md:text-blue-700 lg:text-blue-200"
+                  scrolled ? "text-brand" : "text-blue-200"
                 }`}
               >
                 Home Services
@@ -91,9 +93,9 @@ export default function Header(): React.JSX.Element {
                   href={link.href}
                   className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     isActive
-                      ? "text-blue-700 bg-blue-50/80"
+                      ? "text-brand bg-brand/10"
                       : scrolled
-                      ? "text-slate-700 hover:text-blue-700 hover:bg-slate-50"
+                      ? "text-foreground-muted hover:text-brand hover:bg-surface-hover"
                       : "text-white/90 hover:text-white hover:bg-white/10"
                   }`}
                 >
@@ -103,13 +105,14 @@ export default function Header(): React.JSX.Element {
             })}
           </nav>
 
-          {/* Desktop: phone + rating + CTA */}
+          {/* Desktop: Toggle + phone + rating + CTA */}
           <div className="hidden lg:flex items-center gap-4">
-            <div className="flex flex-col items-end">
+            {/* Phone & Rating (Hidden when scrolled for a cleaner look) */}
+            <div className={`flex flex-col items-end transition-all duration-300 ${scrolled ? "hidden xl:flex" : "flex"}`}>
               <a
                 href={phoneTel}
                 className={`flex items-center gap-1.5 text-sm font-extrabold transition-colors ${
-                  scrolled ? "text-slate-900 hover:text-blue-700" : "text-white hover:text-blue-200"
+                  scrolled ? "text-foreground hover:text-brand" : "text-white hover:text-blue-200"
                 }`}
               >
                 <FiPhone className="w-3.5 h-3.5" />
@@ -117,7 +120,7 @@ export default function Header(): React.JSX.Element {
               </a>
               <span
                 className={`flex items-center gap-1 text-[11px] font-semibold ${
-                  scrolled ? "text-slate-500" : "text-white/70"
+                  scrolled ? "text-foreground-muted" : "text-white/70"
                 }`}
               >
                 <FiStar className="w-3 h-3 fill-current text-amber-400" />
@@ -125,10 +128,14 @@ export default function Header(): React.JSX.Element {
               </span>
             </div>
 
+            <div className="h-6 w-px bg-border hidden xl:block" />
+
+            <ThemeToggle />
+
             <button
               type="button"
               onClick={() => setIsQuoteOpen(true)}
-              className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-blue-700/20 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+              className="bg-brand hover:bg-brand/90 text-brand-foreground px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-brand/20 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
             >
               <span>Get Free Quote</span>
             </button>
@@ -141,7 +148,7 @@ export default function Header(): React.JSX.Element {
             onClick={() => setIsOpen(true)}
             className={`lg:hidden p-2.5 rounded-xl transition-colors ${
               scrolled
-                ? "bg-slate-100 text-slate-900 hover:bg-slate-200"
+                ? "bg-surface border border-border text-foreground hover:bg-surface-hover"
                 : "bg-white/20 text-white backdrop-blur-md hover:bg-white/30"
             }`}
           >
@@ -159,7 +166,7 @@ export default function Header(): React.JSX.Element {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 lg:hidden"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden"
             />
 
             <motion.aside
@@ -167,21 +174,21 @@ export default function Header(): React.JSX.Element {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-white z-50 lg:hidden flex flex-col justify-between shadow-2xl border-l border-slate-100"
+              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-surface z-50 lg:hidden flex flex-col justify-between shadow-2xl border-l border-border"
             >
-              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div className="p-6 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="bg-blue-700 text-white font-extrabold text-sm px-2 py-1 rounded-lg">
+                  <div className="bg-brand text-brand-foreground font-extrabold text-sm px-2 py-1 rounded-lg">
                     MHS
                   </div>
-                  <span className="font-extrabold text-slate-900 tracking-tight">
+                  <span className="font-extrabold text-foreground tracking-tight">
                     Masterpiece
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  className="p-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-surface-hover transition-colors"
                 >
                   <FiX className="w-6 h-6" />
                 </button>
@@ -197,13 +204,13 @@ export default function Header(): React.JSX.Element {
                       onClick={() => setIsOpen(false)}
                       className={`flex items-center justify-between px-4 py-3.5 rounded-xl font-bold transition-all ${
                         isActive
-                          ? "bg-blue-50 text-blue-700"
-                          : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                          ? "bg-brand/10 text-brand"
+                          : "text-foreground-muted hover:bg-surface-hover hover:text-foreground"
                       }`}
                     >
                       <span>{link.name}</span>
                       <FiChevronRight
-                        className={`w-4 h-4 ${isActive ? "text-blue-700" : "text-slate-400"}`}
+                        className={`w-4 h-4 ${isActive ? "text-brand" : "text-foreground-muted"}`}
                       />
                     </Link>
                   );
@@ -211,9 +218,9 @@ export default function Header(): React.JSX.Element {
               </div>
 
               {/* Drawer Footer */}
-              <div className="p-6 border-t border-slate-100 bg-slate-50/50 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-blue-900 bg-blue-100/70 px-3 py-2 rounded-lg">
-                  <Sparkles className="w-4 h-4 text-blue-700 shrink-0" />
+              <div className="p-6 border-t border-border bg-background space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-brand bg-brand/10 px-3 py-2 rounded-lg mb-4">
+                  <Sparkles className="w-4 h-4 shrink-0" />
                   <span>Serving Kamloops & Okanagan Region</span>
                 </div>
 
@@ -223,7 +230,7 @@ export default function Header(): React.JSX.Element {
                     setIsOpen(false);
                     setIsQuoteOpen(true);
                   }}
-                  className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-700/20 flex items-center justify-center gap-2 transition-all"
+                  className="w-full bg-brand hover:bg-brand/90 text-brand-foreground font-bold py-3.5 rounded-xl shadow-lg shadow-brand/20 flex items-center justify-center gap-2 transition-all"
                 >
                   <span>Get Free Quote</span>
                 </button>
@@ -231,11 +238,17 @@ export default function Header(): React.JSX.Element {
                 <a
                   href={phoneTel}
                   onClick={() => setIsOpen(false)}
-                  className="w-full bg-white border border-slate-200 text-slate-900 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-slate-50"
+                  className="w-full bg-surface border border-border text-foreground font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-surface-hover"
                 >
                   <FiPhone className="w-4 h-4" />
                   <span>Call {phoneNumber}</span>
                 </a>
+                
+                {/* Mobile Theme Toggle Row */}
+                <div className="flex items-center justify-between pt-4 border-t border-border mt-2">
+                  <span className="text-sm font-semibold text-foreground-muted">Appearance</span>
+                  <ThemeToggle />
+                </div>
               </div>
             </motion.aside>
           </>
