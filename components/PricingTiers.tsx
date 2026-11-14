@@ -1,53 +1,86 @@
-// src/components/PricingTiers.tsx
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import PricingCard from "@/components/PricingCard";
-import type { PricingPlan } from "@/types/pricing";
+import { useId, useState } from 'react';
+import PricingCard from '@/components/PricingCard';
+import { cn } from '@/lib/cn';
+import type { PricingPlan } from '@/types/pricing';
+
+type Audience = 'residential' | 'commercial';
+
+const TABS: { id: Audience; label: string }[] = [
+  { id: 'residential', label: 'Residential' },
+  { id: 'commercial', label: 'Commercial & strata' },
+];
 
 interface PricingTiersProps {
+  /** Residential plans. */
   plans: PricingPlan[];
+  /** When provided, tabs let visitors switch to commercial pricing. */
+  commercialPlans?: PricingPlan[];
 }
 
-export default function PricingTiers({ plans }: PricingTiersProps): React.JSX.Element {
-  if (!plans || plans.length === 0) return <></>;
+export default function PricingTiers({ plans, commercialPlans = [] }: PricingTiersProps): React.JSX.Element | null {
+  const uid = useId();
+  const plansByAudience: Record<Audience, PricingPlan[]> = { residential: plans, commercial: commercialPlans };
+
+  // Only offer tabs that have something to show.
+  const tabs = TABS.filter((tab) => plansByAudience[tab.id].length > 0);
+  const [active, setActive] = useState<Audience>(tabs[0]?.id ?? 'residential');
+
+  if (tabs.length === 0) return null;
+
+  const current = tabs.some((tab) => tab.id === active) ? active : tabs[0].id;
+
+  const onKeyDown = (event: React.KeyboardEvent, index: number): void => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    const next = tabs[(index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+    setActive(next.id);
+    document.getElementById(`${uid}-tab-${next.id}`)?.focus();
+  };
 
   return (
-    <section className="py-24 bg-white">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="text-xs font-bold text-blue-700 uppercase tracking-widest block mb-2">
-            Clear, Honest Estimates
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Simple, Transparent Pricing
-          </h2>
-          <p className="text-slate-600 text-base">
-            No hidden fees, ever. All prices shown in Canadian dollars (CAD).
-          </p>
+    <div>
+      {tabs.length > 1 && (
+        <div
+          role="tablist"
+          aria-label="Pricing type"
+          className="mx-auto mb-12 grid w-full max-w-md grid-cols-2 gap-1 rounded-xl bg-surface-muted p-1"
+        >
+          {tabs.map((tab, index) => {
+            const selected = tab.id === current;
+            return (
+              <button
+                key={tab.id}
+                id={`${uid}-tab-${tab.id}`}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                aria-controls={`${uid}-panel`}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setActive(tab.id)}
+                onKeyDown={(event) => onKeyDown(event, index)}
+                className={cn(
+                  'rounded-lg px-4 py-2.5 text-sm font-bold transition-colors',
+                  selected ? 'bg-brand text-brand-foreground shadow' : 'text-muted hover:text-foreground',
+                )}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <PricingCard plan={plan} isCommercial={false} />
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="text-center">
-          <Link href="/pricing" className="text-sm font-bold text-blue-700 hover:underline">
-            View full pricing, commercial rates & bundles →
-          </Link>
-        </div>
+      <div
+        id={`${uid}-panel`}
+        role={tabs.length > 1 ? 'tabpanel' : undefined}
+        aria-labelledby={tabs.length > 1 ? `${uid}-tab-${current}` : undefined}
+        className="grid gap-8 pt-3 md:grid-cols-2 lg:grid-cols-3"
+      >
+        {plansByAudience[current].map((plan) => (
+          <PricingCard key={`${current}-${plan.title}`} plan={plan} isCommercial={current === 'commercial'} />
+        ))}
       </div>
-    </section>
+    </div>
   );
 }

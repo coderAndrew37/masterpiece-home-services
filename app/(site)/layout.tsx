@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import BookingModal from '@/components/BookingModal';
 import CookieConsent from '@/components/CookieConsent';
-import Footer from '@/components/Footer';
 import LeadModal from '@/components/LeadModal';
 import QuoteModal from '@/components/QuoteModal';
 import { QuoteModalProvider } from '@/components/QuoteModalProvider';
@@ -13,6 +12,7 @@ import { organizationSchema } from '@/lib/seo/schema';
 import { site } from '@/lib/site';
 import { ThemedToaster } from '@/components/theme/ThemedToaster';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/Footer';
 
 /**
  * Site-wide defaults for the marketing pages (/studio has its own).

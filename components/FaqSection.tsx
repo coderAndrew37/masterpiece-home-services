@@ -9,55 +9,77 @@ interface FaqItem {
   answer: string;
 }
 
-const faqs: FaqItem[] = [
+// Fallback FAQs based on Ubersuggest pricing intent
+const fallbackPricingFaqs: FaqItem[] = [
   {
-    question: 'Do I need to be home during the exterior service?',
-    answer: 'No! As long as exterior water spigots are accessible and gates are unlocked, our team can complete window cleaning, soft washing, or eavestrough care while you are away.',
+    question: 'What should I expect to pay for a full exterior and interior window cleaning service in Canada?',
+    answer: 'For a standard two-storey home in Canada, full interior and exterior window cleaning typically ranges from $250 to $450 CAD, depending on the number of panes and accessibility. We provide a written, no-obligation quote before any work begins.',
   },
   {
-    question: 'Are you insured and safety certified?',
-    answer: 'Yes, Masterpiece Home Services carries $5M in commercial general liability insurance and is fully covered under WorkSafeBC.',
+    question: 'What is the average cost of eavestrough (gutter) cleaning for a detached home in Canada?',
+    answer: 'Gutter cleaning for an average detached home in Canada usually costs between $150 and $300 CAD. Homes with heavy tree coverage or multiple storeys may fall on the higher end. We also offer gutter guard installation to reduce future cleaning costs.',
   },
   {
-    question: 'What happens if it rains on my scheduled cleaning day?',
-    answer: 'Light rain does not affect pure-water window cleaning results. However, in cases of severe storms or high winds, we will contact you to reschedule at no additional cost.',
+    question: 'What is the typical cost of soft washing a house in Canada compared to pressure washing?',
+    answer: 'Soft washing a full house exterior typically ranges from $300 to $600 CAD, while pressure washing a driveway or deck usually costs between $150 and $350 CAD. Soft washing uses low pressure and specialized solutions, making it safer for vinyl and stucco siding.',
   },
   {
-    question: 'How does Christmas Light Installation work in the winter?',
-    answer: 'We supply custom-cut LED lighting, install them safely with property-friendly clips, maintain any burnt-out bulbs during the season, and return in January for complete removal and organized packing.',
+    question: 'Which window cleaning companies offer the best value for residential properties in Canada?',
+    answer: 'The best value comes from companies that offer transparent flat-rate pricing, bundle discounts, and fully insured technicians. We combine professional-grade equipment with local expertise to ensure streak-free results that last longer, saving you money on repeat cleanings.',
+  },
+  {
+    question: 'Where can I find an affordable pressure washing service for my home’s exterior in Canada?',
+    answer: 'Look for local companies that offer bundled packages (e.g., combining driveway pressure washing with window cleaning) to unlock discounts. Our pricing is highly competitive, and we offer free, detailed estimates so you know exactly what you are paying for.',
+  },
+  {
+    question: 'Which professional Christmas light installation service offers the best packages for residential homes in Canada?',
+    answer: 'Our full-service Christmas light packages include custom-fit commercial LED lights, safe installation, mid-season maintenance, and January takedown/storage. Pricing depends on roofline length and design complexity, with most residential packages starting around $400 CAD.',
+  },
+  {
+    question: 'Do you offer multi-service bundle discounts?',
+    answer: 'Yes. Combining multiple outdoor services—such as window washing, gutter cleaning, and pressure washing—unlocks exclusive bundle discounts. This is the most cost-effective way to maintain your home’s exterior in one visit.',
   },
 ];
 
-export default function FaqSection(): React.JSX.Element {
+interface FaqSectionProps {
+  items?: FaqItem[];
+}
+
+export default function FaqSection({ items }: FaqSectionProps): React.JSX.Element {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  
+  // Use passed items if they exist, otherwise use the fallback list
+  const displayFaqs = items && items.length > 0 ? items : fallbackPricingFaqs;
 
   const toggle = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
   };
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-white" id="faq">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-16">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-ink mb-3">FAQ</p>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Frequently Asked Questions
+            Questions about pricing
           </h2>
           <p className="text-slate-600 text-base">
-            Everything you need to know about our cleaning standards and policies.
+            Clear answers about costs, bundles, and what you can expect to pay in Kamloops.
           </p>
         </div>
 
         <div className="space-y-4">
-          {faqs.map((faq: FaqItem, idx: number) => {
+          {displayFaqs.map((faq: FaqItem, idx: number) => {
             const isOpen = openIndex === idx;
             return (
               <div
                 key={idx}
-                className="border border-slate-200 rounded-2xl overflow-hidden transition-colors"
+                className="border border-slate-200 rounded-2xl overflow-hidden transition-colors bg-white shadow-sm"
               >
                 <button
                   onClick={() => toggle(idx)}
-                  className="w-full flex items-center justify-between p-6 text-left bg-white hover:bg-slate-50/80 transition-colors"
+                  className="w-full flex items-center justify-between p-6 text-left hover:bg-slate-50/80 transition-colors"
+                  aria-expanded={isOpen}
                 >
                   <span className="font-bold text-slate-900 text-base sm:text-lg pr-4">
                     {faq.question}

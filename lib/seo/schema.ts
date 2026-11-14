@@ -141,3 +141,62 @@ export function websiteSchema(): JsonLdNode {
     publisher: { '@id': ORG_ID },
   };
 }
+
+interface CollectionItem {
+  name: string;
+  slug: string;
+}
+
+/** A list page (e.g. /services) that points at each item's own page. */
+export function collectionPageSchema({
+  name,
+  path,
+  items,
+  basePath,
+}: {
+  name: string;
+  path: string;
+  items: CollectionItem[];
+  /** Where each item lives, e.g. site.routes.services */
+  basePath: string;
+}): JsonLdNode {
+  const url = absolute(path);
+
+  return {
+    '@type': 'CollectionPage',
+    '@id': `${url}#collection`,
+    url,
+    name,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': ORG_ID },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: items.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        url: absolute(`${basePath}/${item.slug}`),
+      })),
+    },
+  };
+}
+
+interface WebPageSchemaInput {
+  name: string;
+  path: string;
+  type?: 'WebPage' | 'CollectionPage' | 'ContactPage' | 'AboutPage';
+}
+
+/** Ties a page to the shared business and website nodes instead of redeclaring them. */
+export function webPageSchema({ name, path, type = 'WebPage' }: WebPageSchemaInput): JsonLdNode {
+  const url = absolute(path);
+
+  return {
+    '@type': type,
+    '@id': `${url}#webpage`,
+    url,
+    name,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': ORG_ID },
+  };
+}

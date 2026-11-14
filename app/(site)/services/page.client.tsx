@@ -1,112 +1,81 @@
-// src/app/services/page.client.tsx
-'use client';
-
-import CtaBanner from '@/components/CtaBanner';
-import CustomQuoteBanner from '@/components/CustomQuoteBanner';
-import PageTransition from '@/components/PageTransition';
-import PricingTable from '@/components/PricingTable';
-import ServiceBenefits from '@/components/ServiceBenefits';
-import ServiceDetail from '@/components/ServiceDetail';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import React from 'react';
-import { FiGrid } from 'react-icons/fi';
-import Link from 'next/link';
+import type { Metadata } from 'next';
+import type { ServiceArea } from '@/components/home/AreasSection';
+import { CtaSection } from '@/components/sections/CtaSection';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { AreaPills } from '@/components/services/AreaPills';
+import { ServiceCard } from '@/components/services/ServiceCard';
+import { Section } from '@/components/ui/Section';
+import { allServicesQuery, serviceAreasQuery } from '@/lib/sanity/queries';
+import { safeFetch } from '@/lib/sanity/safeFetch';
+import { createMetadata } from '@/lib/seo/metadata';
+import { breadcrumbSchema } from '@/lib/seo/schema';
+import { site } from '@/lib/site';
 import type { ServiceItem } from '@/types/service';
+import { ServicesHero } from '@/components/services/ServicesHero';
+import { ServicePriceTable } from '@/components/services/ServicePriceTable';
+import { ServicePromises } from '@/components/services/ServicePromises';
 
-interface ServicesClientProps {
-  services: ServiceItem[];
-  benefits: string[];
-}
+export const revalidate = 60;
 
-export default function ServicesClient({ services, benefits }: ServicesClientProps): React.JSX.Element {
+export const metadata: Metadata = createMetadata({
+  title: 'Exterior Cleaning Services in Kamloops, BC',
+  description:
+    'Window cleaning, gutter cleaning, soft washing, pressure washing and Christmas lights in Kamloops. Insured, WorkSafeBC-covered crew. Free written quotes.',
+  path: site.routes.services,
+  image: site.images.og,
+});
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Services', href: site.routes.services },
+];
+
+export default async function ServicesPage(): Promise<React.JSX.Element> {
+  const [services, areas] = await Promise.all([
+    safeFetch<ServiceItem[]>(allServicesQuery, []),
+    safeFetch<ServiceArea[]>(serviceAreasQuery, []),
+  ]);
+
   return (
-    <PageTransition>
-      <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/residential-1.jpg"
-            alt="Masterpiece Services Kamloops"
-            fill
-            priority
-            quality={85}
-            className="object-cover object-center opacity-30 scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
-        </div>
+    <>
+      <JsonLd nodes={[breadcrumbSchema(crumbs)]} />
 
-        <div className="container mx-auto px-4 max-w-7xl relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-600/80 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider mb-4 border border-blue-400/30">
-            <FiGrid className="w-3.5 h-3.5" /> Full-Property Care
-          </div>
+      <ServicesHero services={services} crumbs={crumbs} />
 
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-4"
-          >
-            Our Property <span className="text-blue-400">Services</span>
-          </motion.h1>
+      <Section
+        id="all-services"
+        eyebrow="What we do"
+        title="Every service, one local crew"
+        description="Pick a service to see what's included, how it works and what it costs."
+      >
+        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((service) => (
+            <li key={service._id}>
+              <ServiceCard service={service} />
+            </li>
+          ))}
+        </ul>
+      </Section>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15 }}
-            className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed"
-          >
-            From pure-water window wash and soft washing to indoor housekeeping and winter light hanging across Kamloops.
-          </motion.p>
-        </div>
-      </section>
+      <ServicePriceTable services={services} />
+      <ServicePromises />
 
-      <section className="py-20 bg-slate-50">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-bold text-blue-700 uppercase tracking-widest block mb-2">
-              What We Do
-            </span>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Complete Exterior & Interior Solutions
-            </h2>
-            <p className="text-slate-600 text-sm mt-2">
-              Click any service below to explore full details, process explanations, and standalone pricing.
-            </p>
-          </div>
+      {areas.length > 0 && (
+        <Section
+          id="areas"
+          tone="muted"
+          eyebrow="Where we work"
+          title="Serving Kamloops and nearby neighbourhoods"
+          description="Same crew, same standards, wherever you are in the area."
+        >
+          <AreaPills areas={areas} />
+        </Section>
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {services.map((service) => (
-              <ServiceDetail key={service._id} service={service} />
-            ))}
-          </div>
-
-          <CustomQuoteBanner />
-
-          <ServiceBenefits title="Why Kamloops Homeowners Choose Masterpiece" benefits={benefits} />
-
-          <PricingTable
-            title="Standard Service Rates"
-            description="Clear baseline pricing with zero hidden fees. See full plans and bundles on our Pricing page."
-            pricingOptions={services.map((s) => ({
-              service: s.title,
-              details: s.shortDescription ?? 'Service details available upon request.',
-              price: s.startingPrice ?? 'Custom quote',
-            }))}
-          />
-
-          <div className="text-center -mt-8 mb-16">
-            <Link href="/pricing" className="text-sm font-bold text-blue-700 hover:underline">
-              View full pricing plans & bundles →
-            </Link>
-          </div>
-
-          <CtaBanner
-            tagline="Kamloops & Surrounding Areas"
-            title="Ready to Schedule Your Service?"
-            description="Get your free online estimate within 24 hours or call our team directly."
-            buttonText="Request Free Quote"
-          />
-        </div>
-      </section>
-    </PageTransition>
+      <CtaSection
+        title="Ready for a spotless home?"
+        description="Tell us what you need and we'll confirm your price in writing within one business day. Free and no obligation."
+      />
+    </>
   );
 }

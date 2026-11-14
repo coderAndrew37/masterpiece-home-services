@@ -99,18 +99,38 @@ export const defaultAddons: Addon[] = [
 
 export const defaultFaqs: PricingFaqItem[] = [
   {
-    question: 'How does the Christmas Lights Installation service work?',
+    question: 'What should I expect to pay for a full exterior and interior window cleaning service in Canada?',
     answer:
-      'We supply high-efficiency LED commercial lights custom-fit to your roofline, safely install them before winter hits, provide seasonal maintenance if any bulb goes out, and handle prompt removal/storage in January.',
+      'For a standard two-storey home in Canada, full interior and exterior window cleaning typically ranges from $250 to $450 CAD, depending on the number of panes and accessibility. At Masterpiece, we provide a written, no-obligation quote before any work begins.',
   },
   {
-    question: 'What is included in your Indoor House Cleaning service?',
+    question: 'What is the average cost of eavestrough (gutter) cleaning for a detached home in Canada?',
     answer:
-      'Our indoor team handles kitchen sanitization, bathroom scrubbing, floor vacuuming/mopping, dusting, and interior window glass polishing. We offer both routine maintenance visits and deep move-in/move-out cleans.',
+      'Gutter cleaning for an average detached home in Canada usually costs between $150 and $300 CAD. Homes with heavy tree coverage or multiple storeys may fall on the higher end. We also offer gutter guard installation to reduce future cleaning costs.',
   },
   {
-    question: 'Can I bundle outdoor pressure washing with indoor cleaning?',
+    question: 'What is the typical cost of soft washing a house in Canada compared to pressure washing?',
     answer:
-      'Yes! Combining outdoor services (window wash, soft wash, gutters) with indoor cleaning or winter light hanging unlocks multi-service bundle discounts.',
+      'Soft washing a full house exterior typically ranges from $300 to $600 CAD, while pressure washing a driveway or deck usually costs between $150 and $350 CAD. Soft washing uses low pressure and specialized solutions, making it safer for vinyl and stucco siding.',
+  },
+  {
+    question: 'Which window cleaning companies offer the best value for residential properties in Canada?',
+    answer:
+      'The best value comes from companies that offer transparent flat-rate pricing, bundle discounts, and fully insured technicians. We combine professional-grade equipment with local expertise to ensure streak-free results that last longer, saving you money on repeat cleanings.',
+  },
+  {
+    question: 'Where can I find an affordable pressure washing service for my home’s exterior in Canada?',
+    answer:
+      'Look for local companies that offer bundled packages (e.g., combining driveway pressure washing with window cleaning) to unlock discounts. Our pricing is highly competitive, and we offer free, detailed estimates so you know exactly what you are paying for.',
+  },
+  {
+    question: 'Which professional Christmas light installation service offers the best packages for residential homes in Canada?',
+    answer:
+      'Our full-service Christmas light packages include custom-fit commercial LED lights, safe installation, mid-season maintenance, and January takedown/storage. Pricing depends on roofline length and design complexity, with most residential packages starting around $400 CAD.',
+  },
+  {
+    question: 'Do you offer multi-service bundle discounts?',
+    answer:
+      'Yes. Combining multiple outdoor services—such as window washing, gutter cleaning, and pressure washing—unlocks exclusive bundle discounts. This is the most cost-effective way to maintain your home’s exterior in one visit.',
   },
 ];

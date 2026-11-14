@@ -1,89 +1,67 @@
-"use client";
-import React from "react";
-import { motion } from "framer-motion";
-import { FiCheck } from "react-icons/fi";
-import { useBooking } from "@/context/BookingContext";
+'use client';
 
-interface PricingPlan {
-  title: string;
-  description: string;
-  price: string;
-  features: string[];
-  popular: boolean;
-}
+import { Check } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { useQuote } from '@/hooks/useQuote';
+import { cn } from '@/lib/cn';
+import type { PricingPlan } from '@/types/pricing';
 
 interface PricingCardProps {
   plan: PricingPlan;
-  isCommercial: boolean;
+  /** Commercial plans bill monthly with a minimum term. */
+  isCommercial?: boolean;
 }
 
-const PricingCard: React.FC<PricingCardProps> = ({ plan, isCommercial }) => {
-  const isCustom = plan.price.toLowerCase().includes("custom");
-  const { openBooking } = useBooking();
+export default function PricingCard({ plan, isCommercial = false }: PricingCardProps): React.JSX.Element {
+  const { open } = useQuote();
+  const custom = /custom/i.test(plan.price);
 
   return (
-    <motion.div
-      whileHover={{ y: -10 }}
-      className={`relative rounded-xl overflow-hidden shadow-lg ${
-        plan.popular ? "border-2 border-blue-600" : "border border-gray-200"
-      }`}
+    <article
+      className={cn(
+        'relative flex h-full flex-col rounded-2xl border bg-surface p-6 shadow-sm transition-shadow hover:shadow-lg sm:p-8',
+        plan.popular ? 'border-brand ring-2 ring-brand' : 'border-border',
+      )}
     >
       {plan.popular && (
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-6 py-1 rounded-full text-sm font-bold">
-          MOST POPULAR
-        </div>
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-brand px-4 py-1 text-[11px] font-extrabold uppercase tracking-wider text-brand-foreground">
+          Most popular
+        </span>
       )}
 
-      <div className="bg-gradient-to-r from-blue-800 to-blue-600 p-6 text-center">
-        <h3 className="text-xl font-bold text-white">{plan.title}</h3>
-        <p className="text-blue-200">{plan.description}</p>
-      </div>
+      <h3 className="text-xl font-extrabold">{plan.title}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-muted">{plan.description}</p>
 
-      <div className="p-6 bg-white">
-        <div className="text-center mb-6">
-          <div className="text-4xl font-bold text-blue-900 mb-1">
-            {plan.price}
-            {!isCustom && (
-              <span className="text-base font-bold text-blue-700 ml-1.5 align-top">CAD</span>
-            )}
-          </div>
-          {isCommercial && !isCustom && (
-            <p className="text-gray-600 text-sm">per month (min. 3 months)</p>
-          )}
-          {!isCommercial && !isCustom && (
-            <p className="text-gray-600 text-sm">one-time service</p>
-          )}
-        </div>
+      <p className="mt-6 text-5xl font-black tabular-nums">
+        {plan.price}
+        {!custom && <span className="ml-2 text-base font-bold text-brand-ink">CAD</span>}
+      </p>
+      {!custom && (
+        <p className="mt-1 text-sm text-muted">{isCommercial ? 'per month, 3-month minimum' : 'one-time service'}</p>
+      )}
 
-        <ul className="space-y-3 mb-8">
-          {plan.features.map((feature, index) => (
-            <li key={index} className="flex items-start">
-              <div className="bg-blue-100 rounded-full p-1 mr-3 mt-1">
-                <FiCheck className="text-blue-700" />
-              </div>
-              <span className="text-gray-700">{feature}</span>
-            </li>
-          ))}
-        </ul>
+      <ul className="my-6 flex-1 space-y-3 border-t border-border pt-6">
+        {plan.features.map((feature) => (
+          <li key={feature} className="flex items-start gap-2.5 text-sm font-medium">
+            <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-brand-ink" />
+            {feature}
+          </li>
+        ))}
+      </ul>
 
-        <motion.button
-          type="button"
-          onClick={() =>
-            openBooking(plan.title, isCustom ? undefined : `${plan.title} — ${plan.price} CAD`)
-          }
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={`block w-full text-center py-3 px-6 rounded-lg font-bold ${
-            plan.popular
-              ? "bg-blue-700 text-white hover:bg-blue-800"
-              : "bg-blue-100 text-blue-900 hover:bg-blue-200"
-          }`}
-        >
-          {isCustom ? "Get Custom Quote" : "Select Plan"}
-        </motion.button>
-      </div>
-    </motion.div>
+      <Button
+        variant={plan.popular ? 'primary' : 'secondary'}
+        size="lg"
+        className="w-full"
+        onClick={() =>
+          open({
+            service: plan.title,
+            summary: custom ? undefined : `${plan.title} — ${plan.price} CAD`,
+          })
+        }
+      >
+        {custom ? 'Get a custom quote' : 'Select plan'}
+      </Button>
+    </article>
   );
-};
-
-export default PricingCard;
+}

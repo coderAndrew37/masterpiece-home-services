@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check, ShieldCheck } from 'lucide-react';
 import ServiceCalculator from '@/components/ServiceCalculator';
 import { QuoteButton } from '@/components/forms/QuoteButton';
 import { Card } from '@/components/ui/Card';
@@ -13,8 +13,70 @@ interface ServicePricingProps {
   showCalculator: boolean;
 }
 
+const promises = ['Free, no-obligation quote', 'Price confirmed in writing', "Free re-clean if it's not spotless"] as const;
+
+function StartingPriceCard({ price, service }: { price: string; service: string }): React.JSX.Element {
+  return (
+    <div className="tone-inverse flex flex-col rounded-2xl p-6 shadow-lg sm:p-8">
+      <p className="text-xs font-bold uppercase tracking-widest text-brand-ink">Starting at</p>
+      <p className="mt-2 text-6xl font-black tabular-nums">
+        {price}
+        <span className="ml-2 text-base font-bold text-brand-ink">CAD</span>
+      </p>
+      <p className="mt-3 text-sm leading-relaxed text-muted">
+        Your final price depends on your property and is confirmed before we book.
+      </p>
+
+      <ul className="my-6 space-y-2.5 border-y border-border py-6 text-sm font-medium">
+        {promises.map((item) => (
+          <li key={item} className="flex items-center gap-2.5">
+            <ShieldCheck aria-hidden className="size-4 shrink-0 text-brand-ink" />
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      <QuoteButton service={service} size="lg" className="mt-auto w-full">
+        Get my exact price
+      </QuoteButton>
+    </div>
+  );
+}
+
+function FactorsCard({ factors, className }: { factors: string[]; className?: string }): React.JSX.Element {
+  return (
+    <Card className={cn('p-6 sm:p-8', className)}>
+      <h3 className="text-lg font-extrabold">What affects the price</h3>
+      <p className="mt-1 text-sm text-muted">No surprises: these are the things that move your quote.</p>
+      <ul className="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+        {factors.map((factor) => (
+          <li key={factor} className="flex items-start gap-2.5 text-sm font-medium">
+            <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-brand-ink" />
+            {factor}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+function CustomQuoteBanner({ service }: { service: string }): React.JSX.Element {
+  return (
+    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-brand-soft p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <div>
+        <h3 className="font-extrabold">Need something custom?</h3>
+        <p className="mt-1 text-sm text-muted">Post-construction cleanup, multi-surface properties or commercial work.</p>
+      </div>
+      <QuoteButton variant="secondary" service={service} className="shrink-0">
+        Request a custom quote
+      </QuoteButton>
+    </div>
+  );
+}
+
 export function ServicePricing({ service, copy, showCalculator }: ServicePricingProps): React.JSX.Element {
   const price = service.startingPrice?.replace(/^from\s+/i, '');
+  const showPriceCard = !showCalculator && Boolean(price);
 
   return (
     <Section
@@ -24,44 +86,15 @@ export function ServicePricing({ service, copy, showCalculator }: ServicePricing
       title={`${capitalize(copy.keyword)}: pricing`}
       description="Prices are in Canadian dollars. We confirm your exact quote in writing before we book, so there are no surprises on the day."
     >
-      <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
-        <Card className={cn('p-6 sm:p-8', showCalculator ? 'lg:col-span-5' : 'lg:col-span-12')}>
-          {price && (
-            <>
-              <p className="text-sm font-semibold text-muted">Starting at</p>
-              <p className="text-5xl font-black">
-                {price}
-                <span className="ml-2 text-base font-bold text-brand-ink">CAD</span>
-              </p>
-            </>
-          )}
+      <div className="space-y-6">
+        {showCalculator && <ServiceCalculator />}
 
-          <h3 className="mt-6 font-bold">What affects the price</h3>
-          <ul className={cn('mt-3 gap-x-8 gap-y-2.5 text-sm', showCalculator ? 'space-y-2.5' : 'grid sm:grid-cols-2')}>
-            {copy.priceFactors.map((factor) => (
-              <li key={factor} className="flex items-start gap-2.5">
-                <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-brand-ink" />
-                {factor}
-              </li>
-            ))}
-          </ul>
+        <div className={cn('grid gap-6', showPriceCard && 'lg:grid-cols-3')}>
+          {showPriceCard && price && <StartingPriceCard price={price} service={service.title} />}
+          <FactorsCard factors={copy.priceFactors} className={cn(showPriceCard && 'lg:col-span-2')} />
+        </div>
 
-          <div className="mt-6 border-t border-border pt-6">
-            <p className="font-semibold">Need something custom?</p>
-            <p className="mt-1 text-sm text-muted">
-              Post-construction cleanup, multi-surface properties or commercial work.
-            </p>
-            <QuoteButton variant="outline" service={service.title} className="mt-4 w-full sm:w-auto">
-              Request a custom quote
-            </QuoteButton>
-          </div>
-        </Card>
-
-        {showCalculator && (
-          <div className="lg:col-span-7">
-            <ServiceCalculator />
-          </div>
-        )}
+        <CustomQuoteBanner service={service.title} />
       </div>
     </Section>
   );

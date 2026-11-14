@@ -1,6 +1,5 @@
 import { AreasSection, type ServiceArea } from '@/components/home/AreasSection';
 import { FaqSection } from '@/components/home/FaqSection';
-import { FinalCta } from '@/components/home/FinalCta';
 import { Hero } from '@/components/home/Hero';
 import { HowItWorks } from '@/components/home/HowItWorks';
 import { LatestPosts } from '@/components/home/LatestPosts';
@@ -9,6 +8,7 @@ import { ReviewsSection } from '@/components/home/ReviewsSection';
 import { ServicesSection } from '@/components/home/ServicesSection';
 import { TrustBar } from '@/components/home/TrustBar';
 import { WorkSection } from '@/components/home/WorkSection';
+import { CtaSection } from '@/components/sections/CtaSection';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { homeFaqs } from '@/lib/data/homeFaqs';
 import { defaultResidentialPricing } from '@/lib/fallback/pricingData';
@@ -68,7 +68,10 @@ export default async function HomePage(): Promise<React.JSX.Element> {
       <ReviewsSection />
       <AreasSection areas={serviceAreas} />
       <FaqSection faqs={homeFaqs} />
-      <FinalCta />
+      <CtaSection
+  title="Get your free Kamloops exterior cleaning quote"
+  description="Tell us what you need, from windows and gutters to soft washing and Christmas lights. We confirm your exact price in writing within one business day, and our insured, WorkSafeBC-covered crew re-cleans for free if it's not spotless."
+/>
       <LatestPosts posts={latestPosts} />
     </>
   );

@@ -7,6 +7,7 @@ interface OpenOptions {
   /** Pre-selects a service/plan in the booking modal. */
   service?: string;
   summary?: string;
+  quote?: string;
 }
 
 /**
