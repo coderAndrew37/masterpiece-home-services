@@ -40,7 +40,7 @@ export default function HomeClient({
   pricingPlans,
 }: HomeClientProps): React.JSX.Element {
   return (
-    <PageTransition>
+    <>
       <Hero />
       <StatsBar />
 
@@ -73,6 +73,6 @@ export default function HomeClient({
       <Contact />
 
       <LatestBlogs posts={latestPosts} />
-    </PageTransition>
+    </>
   );
 }

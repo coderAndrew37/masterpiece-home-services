@@ -1,220 +1,229 @@
-import { urlFor } from '@/lib/sanity/client';
-import type { PortableTextComponents } from '@portabletext/react';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
-import { useState, type ReactNode } from 'react';
-import { FiArrowRight, FiChevronDown, FiCheckCircle, FiExternalLink } from 'react-icons/fi';
+import { ArrowRight, Check, ExternalLink } from 'lucide-react';
+import type { PortableTextComponents } from '@portabletext/react';
+import type { ReactNode } from 'react';
+import { FaqList } from '@/components/faq/FaqList';
+import { ButtonLink } from '@/components/ui/Button';
+import { CmsImage } from '@/components/ui/CmsImage';
+import { cn } from '@/lib/cn';
+import { imageUrl } from '@/lib/sanity/image';
 
-// ─── Interfaces ─────────────────────────────────────────────────────────────
+/**
+ * No 'use client' on purpose: this file exports a plain object that server pages hand
+ * to <PortableText>. Marking it as a client file turns that object into an opaque
+ * reference, and headings and paragraphs render unstyled.
+ */
+
 interface InlinePostLinkValue {
   customText?: string;
   post?: { title?: string; slug?: { current?: string } };
 }
-interface FaqBlockValue { heading?: string; items: { question: string; answer: string }[]; }
-interface TableRow { cells: string[]; }
-interface TableBlockValue { caption?: string; hasHeaderRow?: boolean; rows: TableRow[]; }
-interface CtaBlockValue { heading: string; body?: string; buttonText: string; buttonHref: string; style?: 'dark' | 'light' | 'highlight'; }
-interface ImageBlockValue { asset?: { _type: 'reference'; _ref: string }; alt?: string; caption?: string; }
-interface LinkMarkValue { href: string; blank?: boolean; }
-interface KeyTakeawaysValue { title?: string; items: string[]; }
+interface FaqBlockValue {
+  heading?: string;
+  items: { question: string; answer: string }[];
+}
+interface TableBlockValue {
+  caption?: string;
+  hasHeaderRow?: boolean;
+  rows: { cells: string[] }[];
+}
+interface CtaBlockValue {
+  heading: string;
+  body?: string;
+  buttonText: string;
+  buttonHref: string;
+  style?: 'dark' | 'light' | 'highlight';
+}
+interface ImageBlockValue {
+  asset?: { _type: 'reference'; _ref: string };
+  alt?: string;
+  caption?: string;
+}
+interface LinkMarkValue {
+  href: string;
+  blank?: boolean;
+}
+interface KeyTakeawaysValue {
+  title?: string;
+  items: string[];
+}
 
-// ─── Renderers ──────────────────────────────────────────────────────────────
+const linkClass =
+  'font-semibold text-brand-ink underline decoration-brand-ink/40 decoration-2 underline-offset-4 transition-colors hover:decoration-brand-ink';
 
-function InlinePostLinkRenderer({ value, children }: { value?: InlinePostLinkValue; children: ReactNode }) {
-  // Fallback: If the post reference is missing, show a red warning link
-  if (!value?.post?.slug?.current) {
+function InlinePostLink({ value, children }: { value?: InlinePostLinkValue; children: ReactNode }): React.JSX.Element {
+  const slug = value?.post?.slug?.current;
+
+  if (!slug) {
+    // Editors see the problem in development; visitors never see a "broken link" badge.
+    if (process.env.NODE_ENV === 'production') return <>{children}</>;
     return (
-      <span 
-        className="font-bold text-red-500 underline decoration-red-300 underline-offset-4 cursor-not-allowed" 
-        title="Missing Sanity Post Reference! Check your GROQ query or Sanity Studio input."
+      <span
+        className="font-bold text-danger underline decoration-dotted underline-offset-4"
+        title="Missing post reference. Check the GROQ query or the Sanity input."
       >
-        {children} (⚠️ Broken Link)
+        {children} (broken post link)
       </span>
     );
   }
 
-  // If customText is provided, use it. Otherwise, use the text highlighted in Sanity.
-  const linkText = value.customText || children;
-
   return (
-    <Link
-      href={`/blog/${value.post.slug.current}`}
-      className="font-bold text-blue-600 underline decoration-blue-300 decoration-2 underline-offset-4 hover:text-blue-800 hover:decoration-blue-600 transition-all duration-200 ease-out inline cursor-pointer"
-    >
-      {linkText}
+    <Link href={`/blog/${slug}`} className={linkClass}>
+      {value?.customText || children}
     </Link>
   );
 }
 
-function FaqBlockRenderer({ heading, items }: FaqBlockValue) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+function FaqBlock({ heading, items }: FaqBlockValue): React.JSX.Element | null {
   if (!items?.length) return null;
-
   return (
-    <div className="my-12 pt-8 border-t border-slate-200">
-      <h2 className="text-2xl font-bold text-slate-900 mb-6">
-        {heading || 'Frequently Asked Questions'}
-      </h2>
-      <div className="divide-y divide-slate-200">
-        {items.map((faq, i) => {
-          const isOpen = openIndex === i;
-          return (
-            <div key={i} className="py-4">
-              <button
-                type="button"
-                onClick={() => setOpenIndex(isOpen ? null : i)}
-                className="w-full flex items-center justify-between gap-4 text-left group"
-                aria-expanded={isOpen}
-              >
-                <span className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{faq.question}</span>
-                <FiChevronDown className={`w-5 h-5 text-blue-600 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {isOpen && (
-                <motion.p
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="text-slate-600 leading-relaxed text-base mt-3 pr-8"
-                >
-                  {faq.answer}
-                </motion.p>
-              )}
-            </div>
-          );
-        })}
-      </div>
+    <div className="my-12 border-t border-border pt-8">
+      <h2 className="mb-6 text-2xl font-bold">{heading || 'Frequently asked questions'}</h2>
+      <FaqList items={items} openFirst={false} />
     </div>
   );
 }
 
-function TableBlockRenderer({ caption, hasHeaderRow, rows }: TableBlockValue) {
+function TableBlock({ caption, hasHeaderRow, rows }: TableBlockValue): React.JSX.Element | null {
   if (!rows?.length) return null;
-  const allRows = rows.map((r) => r.cells);
-  const header = hasHeaderRow ? allRows[0] : null;
-  const body = hasHeaderRow ? allRows.slice(1) : allRows;
+  const all = rows.map((row) => row.cells);
+  const header = hasHeaderRow ? all[0] : null;
+  const body = hasHeaderRow ? all.slice(1) : all;
 
   return (
-    <div className="my-10">
-      {caption && <p className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">{caption}</p>}
-      <div className="overflow-x-auto rounded-xl border border-slate-200">
-        <table className="w-full text-sm sm:text-base border-collapse">
-          {header && (
-            <thead>
-              <tr className="bg-slate-50">
-                {header.map((cell, i) => (
-                  <th key={i} className="text-left font-bold text-slate-900 px-4 py-3 border-b border-slate-200">{cell}</th>
-                ))}
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {body.map((row, ri) => (
-              <tr key={ri} className="bg-white">
-                {row.map((cell, ci) => (
-                  <td key={ci} className="px-4 py-3 text-slate-600 border-b border-slate-100 last:border-0">{cell}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="my-10 overflow-x-auto rounded-xl border border-border">
+      <table className="w-full border-collapse text-sm sm:text-base">
+        {caption && (
+          <caption className="bg-surface-muted px-4 py-3 text-left text-sm font-bold uppercase tracking-wide text-muted">
+            {caption}
+          </caption>
+        )}
+        {header && (
+          <thead>
+            <tr className="bg-surface-muted">
+              {header.map((cell, i) => (
+                <th key={i} scope="col" className="border-b border-border px-4 py-3 text-left font-bold">
+                  {cell}
+                </th>
+              ))}
+            </tr>
+          </thead>
+        )}
+        <tbody className="bg-surface [&_tr:last-child_td]:border-b-0">
+          {body.map((row, ri) => (
+            <tr key={ri}>
+              {row.map((cell, ci) => (
+                <td key={ci} className="border-b border-border px-4 py-3 text-muted">
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function CtaBlockRenderer({ heading, body, buttonText, buttonHref, style }: CtaBlockValue) {
-  const styles = {
-    dark: 'bg-slate-900 text-white',
-    light: 'bg-slate-50 text-slate-900 border border-slate-200',
-    highlight: 'bg-blue-600 text-white',
-  } as const;
-  const resolvedStyle = style || 'highlight';
+const ctaTones = {
+  dark: { box: 'tone-inverse', button: 'primary' },
+  light: { box: 'border border-border bg-surface-muted', button: 'primary' },
+  highlight: { box: 'bg-brand text-brand-foreground', button: 'secondary' },
+} as const;
 
+function CtaBlock({ heading, body, buttonText, buttonHref, style = 'highlight' }: CtaBlockValue): React.JSX.Element {
+  const tone = ctaTones[style] ?? ctaTones.highlight;
   return (
-    <div className={`my-10 rounded-2xl p-8 sm:p-10 ${styles[resolvedStyle]}`}>
-      <h3 className="text-2xl font-bold mb-3">{heading}</h3>
-      {body && <p className={`text-base leading-relaxed mb-6 opacity-90`}>{body}</p>}
-      <a href={buttonHref} className={`inline-flex items-center gap-2 font-bold py-3 px-6 rounded-lg text-sm transition-all hover:scale-105 ${
-        resolvedStyle === 'light' ? 'bg-blue-600 text-white' : 'bg-white text-slate-900'
-      }`}>
-        {buttonText} <FiArrowRight className="w-4 h-4" />
-      </a>
+    <div className={cn('my-10 rounded-2xl p-8 sm:p-10', tone.box)}>
+      <h3 className="mb-3 text-2xl font-bold">{heading}</h3>
+      {body && <p className="mb-6 text-base leading-relaxed opacity-90">{body}</p>}
+      <ButtonLink href={buttonHref} variant={tone.button} size="md">
+        {buttonText}
+        <ArrowRight aria-hidden className="size-4" />
+      </ButtonLink>
     </div>
   );
 }
 
-function KeyTakeawaysRenderer({ title = 'Key Takeaways', items }: KeyTakeawaysValue) {
+function KeyTakeaways({ title = 'Key takeaways', items }: KeyTakeawaysValue): React.JSX.Element | null {
   if (!items?.length) return null;
   return (
-    <div className="my-10 rounded-2xl bg-slate-50 border border-slate-200 p-6 sm:p-8">
-      <h3 className="text-xl font-bold text-slate-900 mb-4">{title}</h3>
+    <aside aria-label={title} className="my-10 rounded-2xl border border-border bg-surface-muted p-6 sm:p-8">
+      <h3 className="mb-4 text-xl font-bold">{title}</h3>
       <ul className="space-y-3">
         {items.map((item, i) => (
           <li key={i} className="flex items-start gap-3">
-            <FiCheckCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-            <span className="text-slate-600 leading-relaxed">{item}</span>
+            <Check aria-hidden className="mt-1 size-5 shrink-0 text-brand-ink" />
+            <span className="leading-relaxed text-muted">{item}</span>
           </li>
         ))}
       </ul>
-    </div>
+    </aside>
   );
 }
 
 export const portableTextComponents: PortableTextComponents = {
   block: {
-    normal: ({ children }) => <p className="text-[17px] leading-[1.8] text-slate-700 mb-6">{children}</p>,
-    h2: ({ children }) => <h2 className="text-3xl font-bold text-slate-900 mt-12 mb-5">{children}</h2>,
-    h3: ({ children }) => <h3 className="text-2xl font-bold text-slate-900 mt-10 mb-4">{children}</h3>,
-    h4: ({ children }) => <h4 className="text-xl font-bold text-slate-900 mt-8 mb-3">{children}</h4>,
+    normal: ({ children }) => <p className="mb-6 text-[17px] leading-[1.8]">{children}</p>,
+    h2: ({ children }) => <h2 className="mb-5 mt-12 text-2xl font-bold sm:text-3xl">{children}</h2>,
+    h3: ({ children }) => <h3 className="mb-4 mt-10 text-xl font-bold sm:text-2xl">{children}</h3>,
+    h4: ({ children }) => <h4 className="mb-3 mt-8 text-lg font-bold sm:text-xl">{children}</h4>,
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-blue-600 pl-6 my-8 text-lg italic text-slate-600">
-        {children}
-      </blockquote>
+      <blockquote className="my-8 border-l-4 border-brand pl-6 text-lg italic text-muted">{children}</blockquote>
     ),
   },
   list: {
-    bullet: ({ children }) => <ul className="list-disc list-outside pl-6 space-y-3 text-[17px] text-slate-700 mb-6">{children}</ul>,
-    number: ({ children }) => <ol className="list-decimal list-outside pl-6 space-y-3 text-[17px] text-slate-700 mb-6">{children}</ol>,
+    bullet: ({ children }) => <ul className="mb-6 list-outside list-disc space-y-3 pl-6 text-[17px]">{children}</ul>,
+    number: ({ children }) => <ol className="mb-6 list-outside list-decimal space-y-3 pl-6 text-[17px]">{children}</ol>,
   },
   marks: {
-    strong: ({ children }) => <strong className="font-bold text-slate-900">{children}</strong>,
+    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     link: ({ value, children }: { value?: LinkMarkValue; children: ReactNode }) => {
       if (!value?.href) return <span>{children}</span>;
-      const isExternal = /^https?:\/\//.test(value.href);
-      
-      // Standard Link Hover Styling
-      const baseClasses = "text-blue-600 font-bold underline decoration-blue-300 decoration-2 underline-offset-4 hover:text-blue-800 hover:decoration-blue-600 transition-all duration-200 ease-out cursor-pointer";
 
-      if (!isExternal) return <Link href={value.href} className={baseClasses}>{children}</Link>;
+      const isWeb = /^https?:\/\//.test(value.href);
+      const isPlainAnchor = isWeb || /^(mailto:|tel:)/.test(value.href);
 
+      if (!isPlainAnchor) {
+        return (
+          <Link href={value.href} className={linkClass}>
+            {children}
+          </Link>
+        );
+      }
       return (
-        <a href={value.href} target="_blank" rel="noopener noreferrer" className={`${baseClasses} inline-flex items-center gap-1`}>
-          {children} <FiExternalLink className="w-3.5 h-3.5" />
+        <a
+          href={value.href}
+          {...(isWeb ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          className={cn(linkClass, isWeb && 'inline-flex items-center gap-1')}
+        >
+          {children}
+          {isWeb && <ExternalLink aria-hidden className="size-3.5" />}
         </a>
       );
     },
     inlinePostLink: ({ value, children }) => (
-      <InlinePostLinkRenderer value={value as InlinePostLinkValue}>{children}</InlinePostLinkRenderer>
+      <InlinePostLink value={value as InlinePostLinkValue}>{children}</InlinePostLink>
     ),
   },
   types: {
     image: ({ value }: { value: ImageBlockValue }) => {
       if (!value?.asset) return null;
-      const imageUrl = urlFor(value as Parameters<typeof urlFor>[0])?.width(1200).height(800).url();
-      if (!imageUrl) return null;
+      const src = imageUrl(value, { width: 1200, height: 800 }, '');
+      if (!src) return null;
       return (
         <figure className="my-10">
-          <span className="block relative w-full aspect-[16/9] rounded-xl overflow-hidden">
-            <Image src={imageUrl} alt={value.alt || ''} fill sizes="(max-width: 768px) 100vw, 800px" className="object-cover" />
-          </span>
-          {value.caption && <figcaption className="text-sm text-slate-500 mt-3 text-center italic">{value.caption}</figcaption>}
+          <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-surface-muted">
+            <CmsImage src={src} alt={value.alt || ''} fill sizes="(max-width: 768px) 100vw, 800px" className="object-cover" />
+          </div>
+          {value.caption && <figcaption className="mt-3 text-center text-sm italic text-muted">{value.caption}</figcaption>}
         </figure>
       );
     },
-    tableBlock: ({ value }: { value: TableBlockValue }) => <TableBlockRenderer {...value} />,
-    ctaBlock: ({ value }: { value: CtaBlockValue }) => <CtaBlockRenderer {...value} />,
-    faqBlock: ({ value }: { value: FaqBlockValue }) => <FaqBlockRenderer {...value} />,
-    keyTakeaways: ({ value }: { value: KeyTakeawaysValue }) => <KeyTakeawaysRenderer {...value} />,
+    tableBlock: ({ value }: { value: TableBlockValue }) => <TableBlock {...value} />,
+    ctaBlock: ({ value }: { value: CtaBlockValue }) => <CtaBlock {...value} />,
+    faqBlock: ({ value }: { value: FaqBlockValue }) => <FaqBlock {...value} />,
+    keyTakeaways: ({ value }: { value: KeyTakeawaysValue }) => <KeyTakeaways {...value} />,
   },
 };

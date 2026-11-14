@@ -1,80 +1,64 @@
-'use client';
-
-import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { FiArrowRight, FiClock } from 'react-icons/fi';
-import { urlFor } from '@/lib/sanity/client';
+import { ArrowRight, Clock } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { CmsImage } from '@/components/ui/CmsImage';
+import { formatDate } from '@/lib/format';
+import { imageUrl } from '@/lib/sanity/image';
 import type { PostCard } from '@/types/blog';
 
 interface BlogCardProps {
   post: PostCard;
+  /** Kept so existing callers compile; the stagger is now handled in CSS. */
   index?: number;
 }
 
-export default function BlogCard({ post, index = 0 }: BlogCardProps): React.JSX.Element {
-  const date = new Date(post.publishedAt).toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  // Safely construct the image URL or fallback to a default local asset
-  const mainImage = post.mainImage;
-  const imageUrl = mainImage && mainImage.asset
-    ? urlFor(mainImage)?.width(700).height(450).url() ?? '/images/residential-1.jpg'
-    : '/images/residential-1.jpg';
+/** Server component: no client JS needed for a card. */
+export function BlogCard({ post }: BlogCardProps): React.JSX.Element {
+  const href = `/blog/${post.slug}`;
+  const category = post.categories?.[0]?.title;
+  const alt = typeof post.mainImage?.alt === 'string' && post.mainImage.alt ? post.mainImage.alt : post.title;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 25 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.3, delay: index * 0.06 }}
-      className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
-    >
-      <Link href={`/blog/${post.slug}`} className="relative h-52 sm:h-56 w-full overflow-hidden bg-slate-900 block">
-        <Image
-          src={imageUrl}
-          alt={typeof post.mainImage?.alt === 'string' ? post.mainImage.alt : post.title}
+    <Card interactive className="group flex h-full flex-col overflow-hidden">
+      <div className="relative aspect-[14/9] overflow-hidden bg-surface-muted">
+        <CmsImage
+          src={imageUrl(post.mainImage, { width: 700, height: 450 })}
+          alt={alt}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-          unoptimized
+          className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
-        {post.categories?.[0] && (
-          <span className="absolute top-4 left-4 bg-slate-950/90 backdrop-blur-md text-blue-300 text-[11px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider border border-blue-400/30">
-            {post.categories[0].title}
+        {category && (
+          <span className="absolute left-4 top-4 rounded-full bg-black/75 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+            {category}
           </span>
         )}
-      </Link>
+      </div>
 
-      <div className="p-7 flex flex-col grow">
-        <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 mb-3">
-          <span>{date}</span>
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-3 flex items-center gap-3 text-xs font-medium text-muted">
+          <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
           {post.readingTime && (
             <span className="flex items-center gap-1">
-              <FiClock className="w-3.5 h-3.5" /> {post.readingTime} min read
+              <Clock aria-hidden className="size-3.5" /> {post.readingTime} min read
             </span>
           )}
         </div>
 
-        <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-blue-700 transition-colors mb-2 leading-snug">
-          <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+        <h3 className="mb-2 text-lg font-extrabold leading-snug">
+          <Link href={href} className="after:absolute after:inset-0">
+            {post.title}
+          </Link>
         </h3>
+        <p className="mb-5 line-clamp-3 text-sm leading-relaxed text-muted">{post.excerpt}</p>
 
-        <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-3">{post.excerpt}</p>
-
-        <Link
-          href={`/blog/${post.slug}`}
-          className="mt-auto inline-flex items-center gap-2 text-blue-700 font-bold text-sm group/link"
-        >
-          Read Article
-          <FiArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-        </Link>
+        <span className="mt-auto inline-flex items-center gap-2 text-sm font-bold text-brand-ink">
+          Read article
+          <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" />
+        </span>
       </div>
-    </motion.div>
+    </Card>
   );
 }
+
+export default BlogCard;

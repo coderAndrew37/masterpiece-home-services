@@ -1,5 +1,22 @@
 import { groq } from "next-sanity";
 
+/**
+ * Expands references inside Portable Text so renderers get real data.
+ * Sanity stores an inline post link as a bare reference; without `post->`
+ * the component has no slug and renders a "broken post link".
+ * Use on every blockContent field (post.body, service.description, ...).
+ */
+const portableTextProjection = groq`[]{
+  ...,
+  markDefs[]{
+    ...,
+    _type == "inlinePostLink" => {
+      // Pass the whole slug object so the React component can read slug.current.
+      "post": post->{ title, slug }
+    }
+  }
+}`;
+
 // Shared projection so list/detail/related all return the same card shape
 const postCardProjection = groq`{
   _id,
@@ -35,16 +52,7 @@ export const postBySlugQuery = groq`
     "slug": slug.current,
     excerpt,
     mainImage,
-    body[]{
-      ...,
-      markDefs[]{
-        ...,
-        _type == "inlinePostLink" => {
-          // Pass the whole slug object so the React component can read slug.current.
-          "post": post->{ title, slug }
-        }
-      }
-    },
+    "body": body${portableTextProjection},
     publishedAt,
     updatedAt,
     readingTime,
@@ -81,43 +89,57 @@ export const homeGalleryQuery = groq`
   }
 `;
 
-export const allServicesQuery = /* groq */ `
+export const allServicesQuery = groq`
 *[_type == "service"] | order(order asc) {
-  _id, 
-  title, 
-  "slug": slug.current, 
+  _id,
+  title,
+  "slug": slug.current,
   "cardImage": cardImage.asset->url,
   "cardImageAlt": cardImage.alt,
   shortDescription,
-  features, 
-  icon, 
-  badge, 
-  startingPrice, 
-  featuredOnHome, 
+  features,
+  icon,
+  badge,
+  startingPrice,
+  featuredOnHome,
   homeSubtitle
 }`;
 
-export const serviceBySlugQuery = /* groq */ `
+export const serviceBySlugQuery = groq`
 *[_type == "service" && slug.current == $slug][0] {
-  _id, title, "slug": slug.current, subtitle, seoTitle, seoDescription,
-  heroImage, "cardImage": cardImage.asset->url, icon, badge, startingPrice, description,
-  whatsIncluded, benefits, processSteps, faqs
+  _id,
+  title,
+  "slug": slug.current,
+  subtitle,
+  seoTitle,
+  seoDescription,
+  heroImage,
+  cardImage,
+  icon,
+  badge,
+  startingPrice,
+  "description": description${portableTextProjection},
+  whatsIncluded,
+  benefits,
+  processSteps,
+  faqs,
+  gallery
 }`;
 
-export const serviceSlugsQuery = /* groq */ `*[_type == "service"].slug.current`;
+export const serviceSlugsQuery = groq`*[_type == "service"].slug.current`;
 
-export const pricingPageQuery = /* groq */ `
+export const pricingPageQuery = groq`
 *[_type == "pricingPage"][0]{
   heroTagline, heroTitle, heroDescription,
   residentialPricing, commercialPricing, addons, faqs
 }`;
 
-export const serviceAreasQuery = /* groq */ `
+export const serviceAreasQuery = groq`
 *[_type == "serviceArea" && published == true] | order(order asc) {
   _id, name, "slug": slug.current, intro, heroImage
 }`;
 
-export const serviceAreaBySlugQuery = /* groq */ `
+export const serviceAreaBySlugQuery = groq`
 *[_type == "serviceArea" && slug.current == $slug && published == true][0] {
   _id, name, "slug": slug.current, region, intro, localHook, heroImage,
   seoTitle, seoDescription,
@@ -127,7 +149,7 @@ export const serviceAreaBySlugQuery = /* groq */ `
   }
 }`;
 
-export const serviceAreaSlugsQuery = /* groq */ `
+export const serviceAreaSlugsQuery = groq`
 *[_type == "serviceArea" && published == true].slug.current
 `;
 
@@ -135,7 +157,7 @@ export const sidebarPostsQuery = groq`
   *[_type == "post" && slug.current != $slug] | order(publishedAt desc)[0...5] ${postCardProjection}
 `;
 
-export const homePricingQuery = /* groq */ `
+export const homePricingQuery = groq`
 *[_type == "pricingPage"][0]{
   "plans": residentialPricing[featuredOnHome != false]{
     title, description, price, features, popular

@@ -1,152 +1,77 @@
-import CookieConsent from "@/components/CookieConsent";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import LeadModal from "@/components/LeadModal";
-import QuoteModal from "@/components/QuoteModal";
-import { QuoteModalProvider } from "@/components/QuoteModalProvider";
-import type { Metadata } from "next";
-import { Toaster } from "sonner";
-import { BookingProvider } from "@/context/BookingContext";
-import BookingModal from "@/components/BookingModal";
-
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://masterpiecehomeservices.ca";
+import type { Metadata } from 'next';
+import BookingModal from '@/components/BookingModal';
+import CookieConsent from '@/components/CookieConsent';
+import Footer from '@/components/Footer';
+import LeadModal from '@/components/LeadModal';
+import QuoteModal from '@/components/QuoteModal';
+import { QuoteModalProvider } from '@/components/QuoteModalProvider';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { ThemeScript } from '@/components/theme/ThemeScript';
+import { BookingProvider } from '@/context/BookingContext';
+import { organizationSchema } from '@/lib/seo/schema';
+import { site } from '@/lib/site';
+import { ThemedToaster } from '@/components/theme/ThemedToaster';
+import { Header } from '@/components/layout/Header';
 
 /**
- * Full public-site metadata lives here (not in the root layout) so it only
- * applies to marketing pages — /studio gets its own metadata instead.
+ * Site-wide defaults for the marketing pages (/studio has its own).
+ * Deliberately NOT set here: `alternates.canonical`. A canonical in a layout is
+ * inherited by every page that doesn't override it, which tells Google that
+ * those pages are duplicates of the homepage. Each page sets its own via
+ * createMetadata().
  */
 export const metadata: Metadata = {
+  metadataBase: new URL(site.url),
   title: {
-    default: "Masterpiece Home Services | Window & Exterior Cleaning in Kamloops, BC",
-    template: "%s | Masterpiece Home Services",
+    default: `${site.name} | Window & Exterior Cleaning in ${site.city}, ${site.region}`,
+    template: `%s | ${site.name}`,
   },
-  description:
-    "Top-rated exterior home care in Kamloops & the Thompson-Okanagan. Professional streak-free window cleaning, eavestrough clearing, soft washing, pressure washing, and custom Christmas light installation.",
-  keywords: [
-    "Window Cleaning Kamloops",
-    "Gutter Cleaning Kamloops",
-    "Eavestrough Clearing BC",
-    "Pressure Washing Thompson-Okanagan",
-    "Soft Wash Exterior House Cleaning",
-    "Christmas Light Installation Kamloops",
-    "Masterpiece Home Services",
-  ],
-  authors: [{ name: "Masterpiece Home Services" }],
-  creator: "Masterpiece Home Services",
-  publisher: "Masterpiece Home Services",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  alternates: {
-    canonical: SITE_URL,
-  },
+  description: site.description,
+  authors: [{ name: site.name }],
+  creator: site.name,
+  publisher: site.name,
+  formatDetection: { email: false, address: false, telephone: false },
   openGraph: {
-    type: "website",
-    locale: "en_CA",
-    url: SITE_URL,
-    title: "Masterpiece Home Services | Premium Exterior Home Care",
-    description:
-      "Professional window detailing, eavestrough clearing, soft washing, and seasonal Christmas lighting across Kamloops and the Thompson-Okanagan.",
-    siteName: "Masterpiece Home Services",
-    images: [
-      {
-        url: `${SITE_URL}/images/og-image.jpg`,
-        width: 1200,
-        height: 630,
-        alt: "Masterpiece Home Services Exterior Cleaning in Kamloops",
-      },
-    ],
+    type: 'website',
+    locale: site.locale,
+    siteName: site.name,
+    images: [{ url: site.images.og, width: 1200, height: 630, alt: `${site.name}: exterior cleaning in ${site.city}` }],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Masterpiece Home Services | Kamloops Exterior Cleaning",
-    description:
-      "Streak-free windows, eavestrough clearing, and full house soft washing in Kamloops, BC.",
-    images: [`${SITE_URL}/og-image.jpg`],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  other: {
-    "geo.region": "CA-BC",
-    "geo.placename": "Kamloops",
-  },
+  twitter: { card: 'summary_large_image', images: [site.images.og] },
+  other: { 'geo.region': 'CA-BC', 'geo.placename': site.city },
 };
 
-// Local Business Structured Data for Google Search Rich Snippets
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "HomeAndConstructionBusiness",
-  name: "Masterpiece Home Services",
-  image: `${SITE_URL}/og-image.jpg`,
-  "@id": SITE_URL,
-  url: SITE_URL,
-  telephone: "+1-250-555-0199",
-  email: "info@masterpiecehomeservices.ca",
-  priceRange: "$$",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Kamloops",
-    addressRegion: "BC",
-    addressCountry: "CA",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: 50.6745,
-    longitude: -120.3273,
-  },
-  areaServed: [
-    { "@type": "AdministrativeArea", name: "Kamloops" },
-    { "@type": "AdministrativeArea", name: "Thompson-Okanagan" },
-    { "@type": "AdministrativeArea", name: "Sun Peaks" },
-  ],
-  hasOfferCatalog: {
-    "@type": "OfferCatalog",
-    name: "Exterior Home Services",
-    itemListElement: [
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Window Cleaning" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Eavestrough & Gutter Care" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "House Soft Washing" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Pressure Washing" } },
-      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Christmas Light Installation" } },
-    ],
-  },
-};
+export default function SiteLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+  return (
+    <ThemeProvider>
+      {/* Sets the theme before first paint. Needs suppressHydrationWarning on <html> in the root layout. */}
+      <ThemeScript />
+      {/* One business entity for the whole site, built from lib/site.ts (no second, conflicting copy). */}
+      <JsonLd nodes={[organizationSchema()]} />
 
-export default function SiteLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
- return (
-    <QuoteModalProvider>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <BookingProvider>
+      <QuoteModalProvider>
+        <BookingProvider>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:font-bold focus:text-brand-foreground"
+          >
+            Skip to content
+          </a>
 
-      <Header />
-      <main className="grow">{children}</main>
-      <Footer />
+          <Header />
+          <main id="main" className="grow">
+            {children}
+          </main>
+          <Footer />
 
-      <CookieConsent />
-      <QuoteModal />
-      <LeadModal />
-      <BookingModal />  
-      <Toaster position="top-right" richColors closeButton />
-      </BookingProvider>
-    </QuoteModalProvider>
+          <CookieConsent />
+          <QuoteModal />
+          <LeadModal />
+          <BookingModal />
+          <ThemedToaster />
+        </BookingProvider>
+      </QuoteModalProvider>
+    </ThemeProvider>
   );
 }

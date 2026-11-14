@@ -1,52 +1,182 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: #ffffff;
-    --surface: #ffffff;
-    --surface-hover: #f8fafc;
+/* Dark mode is class-based: <html class="dark">. See ThemeScript / ThemeToggle. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-    --foreground: #0f172a;
-    --foreground-muted: #475569;
+/* ------------------------------------------------------------------
+   Design tokens
+   Components use semantic utilities (bg-background, text-muted,
+   bg-brand ...) and never hard-coded slate/blue values, so light and
+   dark mode both work from this one file.
+   ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
 
-    --border: #f1f5f9;
-    /* Very faint border */
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --foreground: #0f172a;
+  --muted: #475569;
+  --border: #e2e8f0;
 
-    --primary: #2563eb;
-    /* Premium Blue */
-    --primary-foreground: #ffffff;
-  }
+  --brand: #1d4ed8;
+  --brand-hover: #1e40af;
+  --brand-foreground: #ffffff;
+  --brand-ink: #1d4ed8;
+  /* brand colour used for text/icons on the page background */
+  --brand-soft: #eff6ff;
+  /* tinted brand surface */
 
-  .dark {
-    --background: #0f172a;
-    --surface: #1e293b;
-    --surface-hover: #334155;
+  --star: #f59e0b;
+  --danger: #b91c1c;
+  --ring: #2563eb;
 
-    --foreground: #f8fafc;
-    --foreground-muted: #94a3b8;
+  /* Always-dark bands (hero, areas, final CTA) */
+  --inverse: #0f172a;
+  --inverse-foreground: #f8fafc;
+  --inverse-muted: #cbd5e1;
+}
 
-    --border: #334155;
+.dark {
+  color-scheme: dark;
 
-    --primary: #3b82f6;
-  }
+  --background: #0b1220;
+  --surface: #111a2e;
+  --surface-muted: #0e1626;
+  --foreground: #f1f5f9;
+  --muted: #a3b1c6;
+  --border: #22304a;
+
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --brand-ink: #93c5fd;
+  --brand-soft: #14233f;
+
+  --danger: #f87171;
+  --ring: #60a5fa;
+
+  --inverse: #050a14;
+}
+
+/*
+  .tone-inverse remaps the tokens for everything inside it, so a dark band
+  needs no per-component overrides: <section class="tone-inverse"> and every
+  bg-surface / text-muted / border-border child adapts automatically.
+*/
+.tone-inverse {
+  --background: var(--inverse);
+  --surface: color-mix(in oklab, var(--inverse) 88%, white);
+  --surface-muted: color-mix(in oklab, var(--inverse) 94%, white);
+  --foreground: var(--inverse-foreground);
+  --muted: var(--inverse-muted);
+  --border: color-mix(in oklab, var(--inverse) 80%, white);
+  --brand: #2563eb;
+  --brand-hover: #3b82f6;
+  --brand-ink: #93c5fd;
+  --brand-soft: color-mix(in oklab, var(--inverse) 82%, #2563eb);
+  --danger: #f87171;
+  --ring: #60a5fa;
+
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
-  --color-surface-hover: var(--surface-hover);
+  --color-surface-muted: var(--surface-muted);
   --color-foreground: var(--foreground);
-  --color-foreground-muted: var(--foreground-muted);
+  --color-muted: var(--muted);
   --color-border: var(--border);
-  --color-brand: var(--primary);
-  --color-brand-foreground: var(--primary-foreground);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-star: var(--star);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
 
   --font-sans: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+@layer base {
+
+  /* Make the plain `border` utility use the token instead of currentColor */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ------------------------------------------------------------------
+   .reveal: scroll-in animation with zero JavaScript.
+   Uses scroll-driven animations where supported; elsewhere the content
+   simply renders visible (no hidden-until-JS state, nothing to hydrate).
+   ------------------------------------------------------------------ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  dialog.drawer[open] {
+    animation: drawer-in 0.25s ease-out;
+  }
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
 }

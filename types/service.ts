@@ -51,4 +51,12 @@ export interface DetailedService {
   whatsIncluded?: string[];
   benefits?: string[];
   faqs?: { question: string; answer: string }[];
+  gallery?: ServiceGalleryItem[];
+}
+
+export interface ServiceGalleryItem {
+  _key?: string;
+  alt?: string;
+  caption?: string;
+  image?: SanityImageRef;
 }
