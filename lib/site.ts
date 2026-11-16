@@ -75,6 +75,7 @@ export const site = {
     serviceAreas: '/service-areas',
     contact: '/contact', // confirm this route exists
     about: '/about', // confirm this route exists
+    testimonials: '/testimonials',
   },
 
   images: {

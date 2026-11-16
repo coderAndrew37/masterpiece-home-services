@@ -40,12 +40,17 @@ export function Hero(): React.JSX.Element {
             ))}
           </ul>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <ButtonLink href={phoneTel} variant="secondary" size="lg">
               <Phone aria-hidden className="size-4" />
               Call {phoneNumber}
             </ButtonLink>
+               <ButtonLink href='/about' variant="primary" size="lg">
+              <Phone aria-hidden className="size-4" />
+              Learn More About Us
+            </ButtonLink>
           </div>
+         
         </div>
 
         <div className="lg:col-span-5">

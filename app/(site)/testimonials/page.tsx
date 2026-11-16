@@ -1,35 +1,35 @@
-// src/app/testimonials/page.tsx
 import type { Metadata } from 'next';
-import { client } from '@/lib/sanity/client';
-import { testimonialsQuery } from '@/lib/sanity/queries';
+import { ReviewCard } from '@/components/reviews/ReviewCard';
+import { RatingSummary } from '@/components/reviews/RatingSummary';
+import { ReviewInvite } from '@/components/reviews/ReviewInvite';
+import { CtaSection } from '@/components/sections/CtaSection';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { ButtonLink } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { fetchGooglePlaceReviews } from '@/lib/google/places';
-import TestimonialsClient from './page.client';
+import { testimonialsQuery } from '@/lib/sanity/queries';
+import { safeFetch } from '@/lib/sanity/safeFetch';
+import { createMetadata } from '@/lib/seo/metadata';
+import { breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
+import { site } from '@/lib/site';
+import type { Review } from '@/types/reviews';
+import { PageHero } from '@/components/PageHero';
 
-const SITE_URL = 'https://www.masterpiecehomeservices.ca';
-const PAGE_URL = `${SITE_URL}/testimonials`;
+// The Places API is billed per request, so keep this long. New Sanity testimonials appear within the hour.
+export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: 'Customer Reviews & Testimonials | Masterpiece Home Services Kamloops',
+export const metadata: Metadata = createMetadata({
+  title: 'Customer Reviews of Our Kamloops Cleaning Service',
   description:
-    'Real customer reviews for Masterpiece Home Services in Kamloops, BC \u2014 window detailing, soft washing, eavestrough clearing, and more.',
-  alternates: { canonical: PAGE_URL },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
-  },
-  openGraph: {
-    title: 'Customer Reviews | Masterpiece Home Services Kamloops',
-    description: 'See what Kamloops homeowners say about Masterpiece Home Services.',
-    url: PAGE_URL,
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Customer Reviews | Masterpiece Home Services Kamloops',
-    description: 'See what Kamloops homeowners say about Masterpiece Home Services.',
-  },
-};
+    'Read real reviews of Masterpiece Home Services from Kamloops homeowners: window cleaning, gutter cleaning, soft washing, pressure washing and more.',
+  path: site.routes.testimonials,
+  image: site.images.og,
+});
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Reviews', href: site.routes.testimonials },
+];
 
 interface SanityTestimonial {
   _id: string;
@@ -37,57 +37,93 @@ interface SanityTestimonial {
   rating: number;
   comment: string;
   location?: string;
-  publishedAt: string;
-  source: string;
 }
 
 export default async function TestimonialsPage(): Promise<React.JSX.Element> {
-  const [googleData, directTestimonials] = await Promise.all([
-    fetchGooglePlaceReviews(),
-    client.fetch<SanityTestimonial[]>(testimonialsQuery),
+  const [googleData, direct] = await Promise.all([
+    fetchGooglePlaceReviews().catch(() => null),
+    safeFetch<SanityTestimonial[]>(testimonialsQuery, []),
   ]);
 
-  const googleReviewUrl = process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL || '#';
-  const orgId = `${SITE_URL}/#organization`;
+  const rating = googleData?.rating ?? null;
+  const count = googleData?.userRatingCount ?? null;
+  const mapsUrl = googleData?.mapsUrl ?? null;
 
-  const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Testimonials', item: PAGE_URL },
-    ],
-  };
+  const googleReviews: Review[] = (googleData?.reviews ?? [])
+    .filter((review) => review.text.trim().length > 0)
+    .map((review, index) => ({
+      id: `google-${index}`,
+      source: 'google',
+      rating: review.rating,
+      text: review.text,
+      author: review.authorName,
+      meta: review.relativeTimeDescription,
+    }));
 
-  // Only emitted when Google returns real numbers — this is the fix for
-  // the fabricated hardcoded "5.0" badge that was on this page before.
-  const aggregateRatingJsonLd =
-    googleData.rating !== null && googleData.userRatingCount !== null && googleData.userRatingCount > 0
-      ? {
-          '@context': 'https://schema.org',
-          '@type': 'LocalBusiness',
-          '@id': orgId,
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: googleData.rating,
-            reviewCount: googleData.userRatingCount,
-          },
-        }
-      : null;
+  const directReviews: Review[] = direct.map((item) => ({
+    id: item._id,
+    source: 'direct',
+    rating: item.rating,
+    text: item.comment,
+    author: item.name,
+    meta: item.location,
+  }));
+
+  const reviews = [...googleReviews, ...directReviews];
+
+  const configuredUrl = process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL;
+  const googleReviewUrl = configuredUrl?.startsWith('http') ? configuredUrl : undefined;
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      {aggregateRatingJsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aggregateRatingJsonLd) }} />
+      <JsonLd nodes={[webPageSchema({ name: 'Customer reviews', path: site.routes.testimonials }), breadcrumbSchema(crumbs)]} />
+
+      <PageHero
+        eyebrow="Reviews"
+        title="What Kamloops homeowners say about us"
+        description="Real feedback from homeowners across Kamloops, from Google and from our own customers."
+        crumbs={crumbs}
+      >
+        <ButtonLink href="#review" size="lg">
+          Leave a review
+        </ButtonLink>
+        {rating !== null && count !== null && count > 0 && <RatingSummary rating={rating} count={count} href={mapsUrl} />}
+      </PageHero>
+
+      {reviews.length > 0 && (
+        <Section
+          id="reviews"
+          eyebrow="Customer reviews"
+          title="Recent feedback"
+          description="Reviews are shown as they were written. We don't edit them."
+        >
+          <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {reviews.map((review) => (
+              <li key={review.id}>
+                <ReviewCard review={review} />
+              </li>
+            ))}
+          </ul>
+        </Section>
       )}
-      <TestimonialsClient
-        googleRating={googleData.rating}
-        googleReviewCount={googleData.userRatingCount}
-        googleReviews={googleData.reviews}
-        googleMapsUrl={googleData.mapsUrl}
-        googleReviewUrl={googleReviewUrl}
-        directTestimonials={directTestimonials ?? []}
+
+      <Section
+        id="review"
+        tone="muted"
+        eyebrow="Share your experience"
+        title="Worked with us? Tell us how it went"
+        description={
+          reviews.length > 0
+            ? 'Whatever your experience, you are welcome to do either: post a public review, or send us private feedback.'
+            : "We're just getting started, so your feedback means a lot. Post a public review or send us private feedback."
+        }
+      >
+        <ReviewInvite googleReviewUrl={googleReviewUrl} />
+      </Section>
+
+      <CtaSection
+        title="Book with our streak-free guarantee"
+        description="If you notice any spots or streaks within 48 hours of service, we’ll return to re-clean the affected areas free of charge. Our crew is fully insured ($5M) and WorkSafeBC covered."
       />
     </>
   );
