@@ -1,22 +1,21 @@
 // app/(site)/gallery/page.client.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import PageTransition from '@/components/PageTransition';
 import CtaBanner from '@/components/CtaBanner';
+import { phoneNumber, phoneTel } from '@/lib/constants';
 import { AnimatePresence, motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 import {
   FiCamera,
-  FiX,
   FiChevronLeft,
   FiChevronRight,
   FiMaximize2,
   FiPhone,
   FiPlus,
+  FiX,
 } from 'react-icons/fi';
-import { phoneNumber, phoneTel } from '@/lib/constants';
-import Link from 'next/link';
 
 export interface Category {
   id: string;
@@ -98,7 +97,7 @@ export default function GalleryClient({
   }, [activeImageIndex, handlePrev, handleNext]);
 
   return (
-    <PageTransition>
+    <>
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
@@ -329,6 +328,6 @@ export default function GalleryClient({
         description="Contact us today for a free estimate and see what pure-water detailing can do for your home."
         buttonText="Get Free Estimate"
       />
-    </PageTransition>
+    </>
   );
 }

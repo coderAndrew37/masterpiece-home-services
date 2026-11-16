@@ -1,109 +1,104 @@
-// src/app/contact/page.tsx
 import type { Metadata } from 'next';
-import { client } from '@/lib/sanity/client';
-import { serviceAreasQuery } from '@/lib/sanity/queries';
-import ContactClient from './page.client';
+import { ArrowRight, Phone } from 'lucide-react';
 
-const SITE_URL = 'https://www.masterpiecehomeservices.ca';
-const PAGE_URL = `${SITE_URL}/contact`;
+import { FaqList } from '@/components/faq/FaqList';
+import type { ServiceArea } from '@/components/home/AreasSection';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { AreaPills } from '@/components/services/AreaPills';
+import { ButtonLink } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
+import { phoneNumber, phoneTel } from '@/lib/constants';
+import { contactFaqs } from '@/lib/data/contactFaqs';
+import { allServicesQuery, serviceAreasQuery } from '@/lib/sanity/queries';
+import { safeFetch } from '@/lib/sanity/safeFetch';
+import { createMetadata } from '@/lib/seo/metadata';
+import { breadcrumbSchema, faqSchema, webPageSchema } from '@/lib/seo/schema';
+import { site } from '@/lib/site';
+import type { ServiceItem } from '@/types/service';
+import { ContactForm } from '@/components/ContactForm';
+import { ContactDetails } from '@/components/ContactInfo';
+import { PageHero } from '@/components/PageHero';
 
-export const metadata: Metadata = {
-  title: 'Contact Us | Masterpiece Home Services Kamloops',
+export const revalidate = 60;
+
+export const metadata: Metadata = createMetadata({
+  title: 'Contact Us for a Free Quote in Kamloops, BC',
   description:
-    'Contact Masterpiece Home Services for professional exterior and interior cleaning across Kamloops, Sun Peaks, and the Thompson-Okanagan region. Get a free, fast estimate.',
-  alternates: { canonical: PAGE_URL },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
-  },
-  openGraph: {
-    title: 'Get a Free Quote | Masterpiece Home Services',
-    description: 'Schedule window detailing, soft washing, or eavestrough cleaning in Kamloops, BC.',
-    url: PAGE_URL,
-    type: 'website',
-    images: [{ url: '/images/og-image.jpg', width: 1200, height: 630, alt: 'Contact Masterpiece Home Services' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Get a Free Quote | Masterpiece Home Services',
-    description: 'Schedule window detailing, soft washing, or eavestrough cleaning in Kamloops, BC.',
-    images: ['/images/og-image.jpg'],
-  },
-};
+    'Request a free written quote for window, gutter, soft wash, pressure wash or Christmas light jobs in Kamloops and the Thompson-Okanagan. Call or message us.',
+  path: site.routes.contact,
+  image: site.images.og,
+});
 
-interface ServiceAreaItem {
-  _id: string;
-  name: string;
-  slug: string;
-}
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Contact', href: site.routes.contact },
+];
 
 export default async function ContactPage(): Promise<React.JSX.Element> {
-  const serviceAreas = (await client.fetch<ServiceAreaItem[]>(serviceAreasQuery)) || [];
-
-  const faqs = [
-    {
-      question: 'How quickly can you schedule my service?',
-      answer:
-        'We typically schedule residential services within 2-3 business days. Reach out directly if you need something sooner and we\u2019ll do our best to fit you in.',
-    },
-    {
-      question: 'Do I need to be home during the service?',
-      answer:
-        'For exterior cleaning, you don\u2019t need to be home as long as exterior water spigots are accessible. For interior detailing, we\u2019ll coordinate access with you.',
-    },
-    {
-      question: 'Are your cleaning solutions safe for plants and pets?',
-      answer:
-        'Yes \u2014 we use eco-friendly, biodegradable cleaning solutions along with pure-water filtration systems that are safe for landscaping and pets.',
-    },
-    {
-      question: 'What payment methods do you accept?',
-      answer: 'We accept Interac e-Transfer, major credit cards, and cheque.',
-    },
-    {
-      question: 'Do you offer service guarantees?',
-      answer:
-        'Yes \u2014 if you\u2019re not completely happy with our work, we\u2019ll return to make it right at no additional cost.',
-    },
-  ];
-
-  const orgId = `${SITE_URL}/#organization`;
-
-  const contactPageJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ContactPage',
-    '@id': `${PAGE_URL}#contact`,
-    url: PAGE_URL,
-    name: 'Contact Masterpiece Home Services',
-    mainEntity: { '@id': orgId },
-  };
-
-  const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Contact', item: PAGE_URL },
-    ],
-  };
-
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: { '@type': 'Answer', text: faq.answer },
-    })),
-  };
+  const [services, areas] = await Promise.all([
+    safeFetch<ServiceItem[]>(allServicesQuery, []),
+    safeFetch<ServiceArea[]>(serviceAreasQuery, []),
+  ]);
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <ContactClient serviceAreas={serviceAreas} faqs={faqs} />
+      <JsonLd
+        nodes={[
+          webPageSchema({ name: 'Contact Masterpiece Home Services', path: site.routes.contact, type: 'ContactPage' }),
+          breadcrumbSchema(crumbs),
+          faqSchema(contactFaqs),
+        ]}
+      />
+
+      <PageHero
+        eyebrow="Contact"
+        title="Get a free quote in Kamloops"
+        description="Tell us what you need and we’ll confirm your price in writing within one business day. Prefer to talk? Give us a call."
+        crumbs={crumbs}
+      >
+        <ButtonLink href="#contact-form" size="lg">
+          Send a message
+          <ArrowRight aria-hidden className="size-4" />
+        </ButtonLink>
+        <ButtonLink href={phoneTel} variant="secondary" size="lg">
+          <Phone aria-hidden className="size-4" />
+          {phoneNumber}
+        </ButtonLink>
+      </PageHero>
+
+      <Section
+        id="contact-form"
+        eyebrow="Get in touch"
+        title="Tell us about your home"
+        description="A few details are enough. We’ll follow up if we need anything else."
+      >
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
+          <div className="lg:col-span-7">
+            <ContactForm services={services.map((service) => service.title)} />
+          </div>
+          <aside aria-label="Contact details" className="lg:sticky lg:top-28 lg:col-span-5">
+            <ContactDetails />
+          </aside>
+        </div>
+      </Section>
+
+      {areas.length > 0 && (
+        <Section
+          id="areas"
+          tone="muted"
+          eyebrow="Where we work"
+          title="Serving Kamloops and nearby neighbourhoods"
+          description="Same crew, same standards, wherever you are in the area."
+        >
+          <AreaPills areas={areas} />
+        </Section>
+      )}
+
+      <Section id="faq" eyebrow="FAQ" title="Questions before you book">
+        <div className="mx-auto max-w-3xl">
+          <FaqList items={contactFaqs} />
+        </div>
+      </Section>
     </>
   );
 }

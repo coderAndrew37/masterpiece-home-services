@@ -1,193 +1,113 @@
-// src/app/service-areas/[slug]/page.tsx
-import CtaBanner from '@/components/CtaBanner';
-import PageTransition from '@/components/PageTransition';
-import { client, urlFor } from '@/lib/sanity/client';
-import { serviceAreaBySlugQuery, serviceAreaSlugsQuery } from '@/lib/sanity/queries';
-import { getServiceIcon } from '@/lib/ServiceIcons';
-import type { ServiceAreaDetail } from '@/types/serviceArea';
+import { cache } from 'react';
 import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import React from 'react';
-import { FiArrowRight, FiChevronRight } from 'react-icons/fi';
+import { MapPin } from 'lucide-react';
+import { AreaHero } from '@/components/areas/AreaHero';
+import { AreaServices } from '@/components/areas/AreaServices';
+import { HowItWorks } from '@/components/home/HowItWorks';
+import type { ServiceArea } from '@/components/home/AreasSection';
+import { CtaSection } from '@/components/sections/CtaSection';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { AreaPills } from '@/components/services/AreaPills';
+import { Container, Section } from '@/components/ui/Section';
+import { client } from '@/lib/sanity/client';
+import { imageUrl } from '@/lib/sanity/image';
+import { serviceAreaBySlugQuery, serviceAreaSlugsQuery, serviceAreasQuery } from '@/lib/sanity/queries';
+import { safeFetch } from '@/lib/sanity/safeFetch';
+import { createMetadata } from '@/lib/seo/metadata';
+import { breadcrumbSchema, serviceAreaSchema } from '@/lib/seo/schema';
+import { site } from '@/lib/site';
+import type { ServiceAreaDetail } from '@/types/serviceArea';
 
-const SITE_URL = 'https://www.masterpiecehomeservices.ca';
+export const revalidate = 60;
 
-export async function generateStaticParams() {
+// generateMetadata and the page both need the area; cache() makes it one request.
+const getArea = cache(
+  async (slug: string): Promise<ServiceAreaDetail | null> =>
+    client.fetch<ServiceAreaDetail | null>(serviceAreaBySlugQuery, { slug }),
+);
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const slugs = await client.fetch<string[]>(serviceAreaSlugsQuery);
-  return (slugs || []).map((slug) => ({ slug }));
+  return (slugs ?? []).map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const area = await client.fetch<ServiceAreaDetail | null>(serviceAreaBySlugQuery, { slug });
+  const area = await getArea(slug);
+  if (!area) return { title: 'Service area not found', robots: { index: false, follow: false } };
 
-  if (!area) return { title: 'Service Area Not Found | Masterpiece Kamloops' };
-
-  const canonicalUrl = `${SITE_URL}/service-areas/${slug}`;
-  const title = area.seoTitle ?? `Home Services in ${area.name}, Kamloops | Masterpiece Home Services`;
-  const description = area.seoDescription ?? area.intro;
-
-  return {
-    title,
-    description,
-    alternates: { canonical: canonicalUrl },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
-    },
-    openGraph: {
-      title,
-      description,
-      url: canonicalUrl,
-      type: 'website',
-    },
-  };
+  return createMetadata({
+    title: area.seoTitle ? { absolute: area.seoTitle } : `Home services in ${area.name}, ${site.city}`,
+    description: area.seoDescription ?? area.intro,
+    path: `${site.routes.serviceAreas}/${slug}`,
+    image: imageUrl(area.heroImage, { width: 1200, height: 630 }, site.images.og),
+  });
 }
 
-export default async function ServiceAreaDetailPage({
+export default async function ServiceAreaPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<React.JSX.Element> {
   const { slug } = await params;
-  const area = await client.fetch<ServiceAreaDetail | null>(serviceAreaBySlugQuery, { slug });
 
+  const [area, allAreas] = await Promise.all([getArea(slug), safeFetch<ServiceArea[]>(serviceAreasQuery, [])]);
   if (!area) notFound();
 
-  const pageUrl = `${SITE_URL}/service-areas/${slug}`;
-  const areasUrl = `${SITE_URL}/service-areas`;
+  const services = area.relatedServices ?? [];
+  const nearby = allAreas.filter((item) => item.slug !== slug);
 
-  // References existing Service @id nodes from each /services/[slug] page
-  // instead of redefining Service entities here — avoids duplicate/conflicting
-  // structured data for the same service across two URLs.
-  const collectionJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    '@id': `${pageUrl}#collection`,
-    url: pageUrl,
-    name: `Home Services in ${area.name}, Kamloops`,
-    about: {
-      '@type': 'Place',
-      name: area.name,
-      containedInPlace: { '@type': 'City', name: 'Kamloops' },
-    },
-    isPartOf: { '@id': `${SITE_URL}/#website` },
-    mainEntity: {
-      '@type': 'ItemList',
-      itemListElement: (area.relatedServices ?? []).map((rs, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: { '@id': `${SITE_URL}/services/${rs.service.slug}#service` },
-      })),
-    },
-  };
-
-  const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Service Areas', item: areasUrl },
-      { '@type': 'ListItem', position: 3, name: area.name, item: pageUrl },
-    ],
-  };
+  const crumbs = [
+    { name: 'Home', href: '/' },
+    { name: 'Service areas', href: site.routes.serviceAreas },
+    { name: area.name, href: `${site.routes.serviceAreas}/${slug}` },
+  ];
 
   return (
-    <PageTransition>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-
-      <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={
-              area.heroImage?.asset?._ref
-                ? urlFor({
-                    ...area.heroImage,
-                    asset: {
-                      ...area.heroImage.asset,
-                      _type: area.heroImage.asset._type ?? 'reference',
-                    },
-                  })?.auto('format').url() ?? '/images/residential-1.jpg'
-                : '/images/residential-1.jpg'
-            }
-            alt={area.heroImage?.alt || `${area.name} Kamloops`}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center opacity-30 scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
-        </div>
-
-        <div className="container mx-auto px-4 max-w-4xl relative z-10">
-          <nav aria-label="Breadcrumb" className="mb-4">
-            <ol className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
-              <li>
-                <Link href="/" className="hover:text-blue-400 transition-colors">Home</Link>
-              </li>
-              <li className="flex items-center gap-1.5">
-                <FiChevronRight className="w-3 h-3" />
-                <Link href="/service-areas" className="hover:text-blue-400 transition-colors">Service Areas</Link>
-              </li>
-              <li className="flex items-center gap-1.5 text-blue-400">
-                <FiChevronRight className="w-3 h-3" />
-                <span aria-current="page">{area.name}</span>
-              </li>
-            </ol>
-          </nav>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
-            Home Services in {area.name}, Kamloops
-          </h1>
-
-          <p className="text-lg sm:text-xl text-slate-300 leading-relaxed">{area.intro}</p>
-        </div>
-      </section>
-
-      <section className="py-16 bg-slate-50">
-        <div className="container mx-auto px-4 max-w-4xl space-y-10">
-          {(area.relatedServices ?? []).map((rs) => (
-            <div
-              key={rs.service.slug}
-              className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm"
-            >
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
-                  {getServiceIcon(rs.service.icon, 'w-5 h-5 text-blue-600')}
-                </div>
-                <h2 className="text-2xl font-extrabold text-slate-900 pt-1.5">
-                  {rs.service.title} in {area.name}
-                </h2>
-              </div>
-
-              <p className="text-slate-600 leading-relaxed mb-6">{rs.blurb}</p>
-
-              <Link
-                href={`/services/${rs.service.slug}`}
-                className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 hover:underline"
-              >
-                <span>See our {rs.service.title.toLowerCase()} service</span>
-                <FiArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <CtaBanner
-        tagline={`Serving ${area.name}`}
-        title={`Ready to Book Service in ${area.name}?`}
-        description={`Get a fast, no-obligation quote for your ${area.name} property. Insured, WorkSafeBC-covered crew, 24-hour estimate delivery.`}
-        buttonText="Get Free Quote"
+    <>
+      <JsonLd
+        nodes={[
+          serviceAreaSchema({ name: area.name, slug, serviceSlugs: services.map((item) => item.service.slug) }),
+          breadcrumbSchema(crumbs),
+        ]}
       />
-    </PageTransition>
+
+      <AreaHero area={area} crumbs={crumbs} />
+
+      {area.localHook && (
+        <section aria-label={`Local note for ${area.name}`} className="border-b border-border">
+          <Container className="py-10">
+            <div className="flex items-start gap-4 rounded-2xl border border-brand/30 bg-brand-soft p-6 sm:p-8">
+              <MapPin aria-hidden className="mt-1 size-5 shrink-0 text-brand-ink" />
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-ink">Local note</p>
+                <p className="mt-2 max-w-3xl text-lg leading-relaxed">{area.localHook}</p>
+              </div>
+            </div>
+          </Container>
+        </section>
+      )}
+
+      <AreaServices areaName={area.name} items={services} />
+      <HowItWorks />
+
+      {nearby.length > 0 && (
+        <Section
+          id="nearby"
+          tone="muted"
+          eyebrow="Nearby"
+          title="Also serving nearby neighbourhoods"
+          description="Same crew, same standards across the area."
+        >
+          <AreaPills areas={nearby} />
+        </Section>
+      )}
+
+      <CtaSection
+        title={`Book exterior cleaning in ${area.name}`}
+        description={`Tell us what you need and we'll confirm your price in writing within one business day. Our insured, WorkSafeBC-covered crew re-cleans for free if it's not spotless.`}
+      />
+    </>
   );
 }

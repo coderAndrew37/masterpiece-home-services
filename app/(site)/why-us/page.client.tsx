@@ -2,7 +2,6 @@
 
 import ComparisonTable from '@/components/ComparisonTable';
 import CtaBanner from '@/components/CtaBanner';
-import PageTransition from '@/components/PageTransition';
 import ProcessTimeline from '@/components/ProcessTimeline';
 import { motion } from 'framer-motion';
 import React from 'react';
@@ -39,7 +38,7 @@ export default function WhyUsClient({
   processSteps,
 }: WhyUsClientProps): React.JSX.Element {
   return (
-    <PageTransition>
+    <>
     {/* 1. Masterpiece Hero Header */}
 <section className="relative bg-slate-950 text-white py-24 sm:py-32 overflow-hidden">
   {/* Background Image Container */}
@@ -178,6 +177,6 @@ export default function WhyUsClient({
 
         </div>
       </div>
-    </PageTransition>
+    </>
   );
 }

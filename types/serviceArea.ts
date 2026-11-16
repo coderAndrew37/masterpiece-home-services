@@ -1,5 +1,28 @@
-// src/types/serviceArea.ts
-import type { SanityImageRef } from './service';
+
+import type { SanityImageRef } from '@/types/service';
+
+export interface AreaServiceLink {
+  blurb?: string;
+  service: {
+    title: string;
+    slug: string;
+    icon: string;
+    startingPrice?: string;
+  };
+}
+
+export interface ServiceAreaDetail {
+  _id: string;
+  name: string;
+  slug: string;
+  region?: string;
+  intro: string;
+  localHook?: string;
+  heroImage?: SanityImageRef;
+  seoTitle?: string;
+  seoDescription?: string;
+  relatedServices?: AreaServiceLink[];
+}
 
 export interface ServiceAreaCard {
   _id: string;
@@ -18,15 +41,3 @@ export interface ServiceAreaRelatedService {
   };
 }
 
-export interface ServiceAreaDetail {
-  _id: string;
-  name: string;
-  slug: string;
-  region?: string;
-  intro: string;
-  localHook?: string;
-  heroImage?: SanityImageRef;
-  seoTitle?: string;
-  seoDescription?: string;
-  relatedServices?: ServiceAreaRelatedService[];
-}

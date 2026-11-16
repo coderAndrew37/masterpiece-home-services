@@ -1,222 +1,189 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { FiSend } from "react-icons/fi";
+import { useEffect, useId, useRef, useState } from 'react';
+import Link from 'next/link';
+import { Check, Send } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { contactEmail, phoneNumber, phoneTel } from '@/lib/constants';
+import type { LeadPayload } from '@/types/lead';
+import { Field, inputClass } from './forms/Fields';
 
-interface ContactFormData {
-  name: string;
-  email: string;
-  phone: string;
-  service: string;
-  message: string;
-}
+type Status = 'idle' | 'sending' | 'success' | 'error';
 
-export default function ContactForm(): React.JSX.Element {
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    email: "",
-    phone: "",
-    service: "",
-    message: "",
-  });
+const NOT_SURE = 'Not sure yet';
+const linkClass = 'font-bold underline underline-offset-4';
 
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+export function ContactForm({ services }: { services: string[] }): React.JSX.Element {
+  const uid = useId();
+  const [status, setStatus] = useState<Status>('idle');
+  const messageRef = useRef<HTMLDivElement>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // Move focus to the result so keyboard and screen-reader users notice it.
+  useEffect(() => {
+    if (status === 'success' || status === 'error') messageRef.current?.focus();
+  }, [status]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const submit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        service: "",
-        message: "",
+    const form = new FormData(event.currentTarget);
+    const read = (key: keyof LeadPayload): string => String(form.get(key) ?? '').trim();
+    const payload: LeadPayload = {
+      name: read('name'),
+      email: read('email'),
+      phone: read('phone'),
+      service: read('service'),
+      message: read('message'),
+      website: read('website'),
+    };
+
+    setStatus('sending');
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-
-      setTimeout(() => setIsSubmitted(false), 6000);
-    }, 1200);
+      setStatus(response.ok ? 'success' : 'error');
+    } catch {
+      setStatus('error');
+    }
   };
+
+  if (status === 'success') {
+    return (
+      <Card className="p-8 text-center sm:p-10">
+        <div ref={messageRef} tabIndex={-1} role="status" className="focus-visible:outline-none">
+          <span className="mx-auto grid size-14 place-items-center rounded-full bg-brand-soft">
+            <Check aria-hidden className="size-7 text-brand-ink" />
+          </span>
+          <h2 className="mt-5 text-2xl font-black">Thanks, we’ve got your request</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
+            A member of our Kamloops crew will review it and reply within one business day. Need it sooner? Call{' '}
+            <a href={phoneTel} className={linkClass}>
+              {phoneNumber}
+            </a>
+            .
+          </p>
+        </div>
+        <Button variant="secondary" className="mt-6" onClick={() => setStatus('idle')}>
+          Send another request
+        </Button>
+      </Card>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-10 border border-slate-100">
-      {isSubmitted ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center"
-        >
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4">
-            ✓
-          </div>
-          <h3 className="text-2xl font-black text-emerald-900 mb-2">
-            Quote Request Received!
-          </h3>
-          <p className="text-emerald-700 text-sm leading-relaxed max-w-md mx-auto">
-            Thank you for reaching out to Masterpiece Home Services. A member of our Kamloops team will review your property details and contact you within 24 hours.
-          </p>
-        </motion.div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Full Name */}
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-slate-800 text-xs font-bold uppercase tracking-wider mb-2"
-            >
-              Full Name *
-            </label>
+    <Card className="p-6 sm:p-8">
+      <h2 className="text-2xl font-black">Request your free quote</h2>
+      <p className="mt-1 text-sm text-muted">We reply within one business day.</p>
+
+      <form
+        onSubmit={(event) => {
+          void submit(event);
+        }}
+        className="mt-6 space-y-5"
+      >
+        <Field label="Full name" htmlFor={`${uid}-name`} required>
+          <input id={`${uid}-name`} name="name" type="text" autoComplete="name" required className={inputClass} />
+        </Field>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Email" htmlFor={`${uid}-email`} required>
             <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
+              id={`${uid}-email`}
+              name="email"
+              type="email"
+              autoComplete="email"
               required
-              className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all"
-              placeholder="e.g. John Smith"
+              className={inputClass}
             />
-          </div>
+          </Field>
+          <Field label="Phone" htmlFor={`${uid}-phone`}>
+            <input id={`${uid}-phone`} name="phone" type="tel" autoComplete="tel" className={inputClass} />
+          </Field>
+        </div>
 
-          {/* Email & Phone Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-slate-800 text-xs font-bold uppercase tracking-wider mb-2"
-              >
-                Email Address *
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all"
-                placeholder="john@example.com"
-              />
-            </div>
+        <Field label="What do you need?" htmlFor={`${uid}-service`} required>
+          <select id={`${uid}-service`} name="service" required defaultValue="" className={inputClass}>
+            <option value="">Select a service</option>
+            {[...services, NOT_SURE].map((service) => (
+              <option key={service} value={service}>
+                {service}
+              </option>
+            ))}
+          </select>
+        </Field>
 
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-slate-800 text-xs font-bold uppercase tracking-wider mb-2"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all"
-                placeholder="(250) 555-0199"
-              />
-            </div>
-          </div>
+        <Field
+          label="Property details"
+          htmlFor={`${uid}-message`}
+          required
+          hint="Rough size, number of storeys, and anything we should know."
+        >
+          <textarea
+            id={`${uid}-message`}
+            name="message"
+            rows={4}
+            required
+            placeholder="e.g. Two-storey home in Sahali, exterior windows and gutters"
+            className={`${inputClass} resize-y`}
+          />
+        </Field>
 
-          {/* Service Dropdown */}
-          <div>
-            <label
-              htmlFor="service"
-              className="block text-slate-800 text-xs font-bold uppercase tracking-wider mb-2"
-            >
-              Primary Service Needed *
-            </label>
-            <select
-              id="service"
-              name="service"
-              value={formData.service}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all"
-            >
-              <option value="">Select a service category</option>
-              <option value="window-cleaning">Window Cleaning & Detailing</option>
-              <option value="eavestrough-care">Eavestrough & Gutter Clearing</option>
-              <option value="soft-washing">Full House Soft Washing</option>
-              <option value="pressure-washing">Driveway & Surface Pressure Washing</option>
-              <option value="holiday-lights">Christmas Light Installation</option>
-            </select>
-          </div>
+        {/* Honeypot: hidden from people, tempting to bots. */}
+        <div aria-hidden className="hidden">
+          <label>
+            Website
+            <input name="website" type="text" tabIndex={-1} autoComplete="off" />
+          </label>
+        </div>
 
-          {/* Message */}
-          <div>
-            <label
-              htmlFor="message"
-              className="block text-slate-800 text-xs font-bold uppercase tracking-wider mb-2"
-            >
-              Property Details / Message *
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              rows={4}
-              value={formData.message}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all resize-none"
-              placeholder="Tell us about your home (e.g., 2-story home in Sahali, exterior window detailing needed)..."
-            ></textarea>
-          </div>
-
-          {/* Submit Button */}
-          <motion.button
-            type="submit"
-            disabled={isSubmitting}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center shadow-lg shadow-blue-700/20 text-sm transition-all"
+        {status === 'error' && (
+          <div
+            ref={messageRef}
+            tabIndex={-1}
+            role="alert"
+            className="rounded-xl border border-danger/40 bg-danger/10 p-4 text-sm focus-visible:outline-none"
           >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Sending Request...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <FiSend className="w-4 h-4" /> Send Quote Request
-              </span>
-            )}
-          </motion.button>
-        </form>
-      )}
-    </div>
+            <p className="font-bold text-danger">We couldn’t send that.</p>
+            <p className="mt-1 text-muted">
+              Please try again, or call{' '}
+              <a href={phoneTel} className={linkClass}>
+                {phoneNumber}
+              </a>{' '}
+              or email{' '}
+              <a href={`mailto:${contactEmail}`} className={linkClass}>
+                {contactEmail}
+              </a>
+              .
+            </p>
+          </div>
+        )}
+
+        <Button type="submit" size="lg" className="w-full" disabled={status === 'sending'}>
+          {status === 'sending' ? (
+            <>
+              <span aria-hidden className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Sending…
+            </>
+          ) : (
+            <>
+              <Send aria-hidden className="size-4" />
+              Send my request
+            </>
+          )}
+        </Button>
+
+        <p className="text-center text-xs text-muted">
+          We only use your details to reply to your request. See our{' '}
+          <Link href="/privacy-policy" className="underline underline-offset-4 hover:text-foreground">
+            privacy policy
+          </Link>
+          .
+        </p>
+      </form>
+    </Card>
   );
 }

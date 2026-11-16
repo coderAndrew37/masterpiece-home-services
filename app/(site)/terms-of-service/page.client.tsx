@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import PageTransition from '@/components/PageTransition';
 
 interface TermsOfServiceClientProps {
   children: React.ReactNode;
@@ -11,7 +10,7 @@ export default function TermsOfServiceClient({
   children,
 }: TermsOfServiceClientProps) {
   return (
-    <PageTransition>
+    <>
       <div className="bg-gradient-to-r from-blue-900 to-blue-700 py-24 text-center">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -40,6 +39,6 @@ export default function TermsOfServiceClient({
           <div className="p-8 md:p-12">{children}</div>
         </motion.div>
       </div>
-    </PageTransition>
+    </>
   );
 }

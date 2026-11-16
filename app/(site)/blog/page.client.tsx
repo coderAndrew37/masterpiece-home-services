@@ -1,6 +1,5 @@
 'use client';
 
-import PageTransition from '@/components/PageTransition';
 import CtaBanner from '@/components/CtaBanner';
 import BlogCard from '@/components/blog/BlogCard';
 import { motion } from 'framer-motion';
@@ -15,7 +14,7 @@ interface BlogClientProps {
 
 export default function BlogClient({ posts }: BlogClientProps): React.JSX.Element {
   return (
-    <PageTransition>
+    <>
       {/* Hero Header */}
       <section className="relative py-20 lg:py-28 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -79,6 +78,6 @@ export default function BlogClient({ posts }: BlogClientProps): React.JSX.Elemen
           />
         </div>
       </section>
-    </PageTransition>
+    </>
   );
 }

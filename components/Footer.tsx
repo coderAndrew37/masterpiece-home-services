@@ -19,7 +19,7 @@ interface FooterLink {
 const legalLinks: FooterLink[] = [
   { name: 'Privacy Policy', href: '/privacy-policy' },
   { name: 'Terms of Service', href: '/terms-of-service' },
-  { name: 'Sitemap', href: '/sitemap' },
+  { name: 'Sitemap', href: '/sitemap.xml' },
 ];
 
 const socialNetworks: { match: string; label: string; icon: IconType }[] = [

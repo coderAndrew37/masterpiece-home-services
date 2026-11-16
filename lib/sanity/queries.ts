@@ -143,9 +143,9 @@ export const serviceAreaBySlugQuery = groq`
 *[_type == "serviceArea" && slug.current == $slug && published == true][0] {
   _id, name, "slug": slug.current, region, intro, localHook, heroImage,
   seoTitle, seoDescription,
-  relatedServices[]{
+  "relatedServices": relatedServices[defined(service->slug.current)]{
     blurb,
-    "service": service->{ title, "slug": slug.current, icon }
+    "service": service->{ title, "slug": slug.current, icon, startingPrice }
   }
 }`;
 

@@ -28,6 +28,7 @@ export function organizationSchema(services: ServiceSummary[] = []): JsonLdNode 
     telephone: phoneNumber,
     priceRange: site.priceRange,
     description: site.description,
+        foundingDate: site.foundingDate,
     address: {
       '@type': 'PostalAddress',
       streetAddress: site.address.street,
@@ -198,5 +199,39 @@ export function webPageSchema({ name, path, type = 'WebPage' }: WebPageSchemaInp
     name,
     isPartOf: { '@id': WEBSITE_ID },
     about: { '@id': ORG_ID },
+  };
+}
+
+
+export function serviceAreaSchema({
+  name,
+  slug,
+  serviceSlugs,
+}: {
+  name: string;
+  slug: string;
+  serviceSlugs: string[];
+}): JsonLdNode {
+  const url = absolute(`${site.routes.serviceAreas}/${slug}`);
+
+  return {
+    '@type': 'CollectionPage',
+    '@id': `${url}#webpage`,
+    url,
+    name: `Home services in ${name}, ${site.city}`,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: {
+      '@type': 'Place',
+      name,
+      containedInPlace: { '@type': 'City', name: site.city },
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: serviceSlugs.map((serviceSlug, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: { '@id': `${absolute(`${site.routes.services}/${serviceSlug}`)}#service` },
+      })),
+    },
   };
 }

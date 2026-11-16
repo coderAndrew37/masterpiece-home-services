@@ -1,22 +1,20 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { PortableText } from '@portabletext/react';
-import { FiArrowRight, FiClock, FiCalendar, FiChevronLeft } from 'react-icons/fi';
-import PageTransition from '@/components/PageTransition';
-import CtaBanner from '@/components/CtaBanner';
-import AuthorCard from '@/components/blog/AuthorCard';
-import ShareButtons from '@/components/blog/ShareButtons';
-import RelatedPosts from '@/components/blog/RelatedPosts';
 import RelatedServices from '@/components/RelatedServices';
-import SidebarPostList from '@/components/blog/SidebarPostList';
+import AuthorCard from '@/components/blog/AuthorCard';
 import { portableTextComponents } from '@/components/blog/PortableTextComponents';
+import RelatedPosts from '@/components/blog/RelatedPosts';
+import ShareButtons from '@/components/blog/ShareButtons';
+import SidebarPostList from '@/components/blog/SidebarPostList';
 import { urlFor } from '@/lib/sanity/client';
 import type { PostCard, PostDetail } from '@/types/blog';
 import type { RelatedServiceItem } from '@/types/service';
+import { PortableText } from '@portabletext/react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
+import { FiArrowRight, FiCalendar, FiChevronLeft, FiClock } from 'react-icons/fi';
 
 interface BlogDetailClientProps {
   post: PostDetail;
@@ -40,7 +38,7 @@ export default function BlogDetailClient({
   const mainImageUrl = urlFor(post.mainImage)?.width(1600).height(900).url();
 
   return (
-    <PageTransition>
+    <>
       <div className="bg-white min-h-screen pb-20">
         
         <section className="pt-12 pb-24">
@@ -175,6 +173,6 @@ export default function BlogDetailClient({
           </div>
         </section>
       </div>
-    </PageTransition>
+    </>
   );
 }

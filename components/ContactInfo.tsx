@@ -1,113 +1,78 @@
-"use client";
+import type { ReactNode } from 'react';
+import { Clock, Mail, MapPin, Phone, ShieldCheck, type LucideIcon } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { contactEmail, phoneNumber, phoneTel } from '@/lib/constants';
+import { hoursLines } from '@/lib/hours';
+import { site } from '@/lib/site';
 
-import React from "react";
-import { motion } from "framer-motion";
-import { FiMail, FiPhone, FiMapPin, FiClock, FiAlertCircle } from "react-icons/fi";
-import { phoneNumber, phoneTel } from "@/lib/constants";
-
-export default function ContactInfo(): React.JSX.Element {
+function Detail({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: LucideIcon;
+  label: string;
+  children: ReactNode;
+}): React.JSX.Element {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-      className="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 text-white rounded-3xl shadow-xl p-8 sm:p-10 border border-slate-800 flex flex-col justify-between h-full"
-    >
+    <div className="flex gap-4">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-soft">
+        <Icon aria-hidden className="size-5 text-brand-ink" />
+      </span>
       <div>
-        <h3 className="text-2xl font-extrabold mb-8 border-b border-slate-800 pb-4 text-white">
-          Get In Touch
-        </h3>
-
-        <div className="space-y-6">
-          {/* Phone */}
-          <div className="flex items-start">
-            <div className="bg-blue-700/80 p-3 rounded-2xl mr-4 shrink-0 text-white shadow-sm">
-              <FiPhone className="text-xl" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Phone & Direct Line
-              </h4>
-              <a
-                href={phoneTel}
-                className="text-lg font-bold text-white hover:text-blue-400 transition-colors"
-              >
-                {phoneNumber}
-              </a>
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="flex items-start">
-            <div className="bg-blue-700/80 p-3 rounded-2xl mr-4 shrink-0 text-white shadow-sm">
-              <FiMail className="text-xl" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Email Inquiries
-              </h4>
-              <a
-                href="mailto:info@masterpiecehomeservices.ca"
-                className="text-base font-semibold text-white hover:text-blue-400 transition-colors break-all"
-              >
-                info@masterpiecehomeservices.ca
-              </a>
-            </div>
-          </div>
-
-          {/* Location */}
-          <div className="flex items-start">
-            <div className="bg-blue-700/80 p-3 rounded-2xl mr-4 shrink-0 text-white shadow-sm">
-              <FiMapPin className="text-xl" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Primary Service Region
-              </h4>
-              <p className="text-base font-medium text-slate-200">
-                Kamloops & The Thompson-Okanagan, BC
-              </p>
-            </div>
-          </div>
-
-          {/* Operating Hours */}
-          <div className="flex items-start">
-            <div className="bg-blue-700/80 p-3 rounded-2xl mr-4 shrink-0 text-white shadow-sm">
-              <FiClock className="text-xl" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">
-                Business Hours
-              </h4>
-              <ul className="space-y-1 text-sm font-medium text-slate-300">
-                <li>Monday – Friday: 7:30 AM – 6:00 PM</li>
-                <li>Saturday: 8:30 AM – 4:00 PM</li>
-                <li>Sunday: Closed</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <dt className="text-xs font-bold uppercase tracking-wider text-muted">{label}</dt>
+        <dd className="mt-1 text-sm font-medium">{children}</dd>
       </div>
+    </div>
+  );
+}
 
-      {/* Emergency / Rush Dispatch Box */}
-      <div className="mt-10 pt-6 border-t border-slate-800">
-        <div className="flex items-center gap-2 mb-2">
-          <FiAlertCircle className="text-amber-400 text-lg" />
-          <h4 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
-            Urgent Eavestrough or Storm Cleaning?
-          </h4>
-        </div>
-        <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-          Need immediate post-storm clearance or same-week listing prep? Give our team a direct call.
-        </p>
+export function ContactDetails(): React.JSX.Element {
+  const hours = hoursLines(site.hours);
+
+  return (
+    <div className="space-y-6">
+      <div className="tone-inverse rounded-2xl p-6 shadow-lg sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-widest text-brand-ink">Prefer to talk?</p>
         <a
           href={phoneTel}
-          className="inline-flex items-center justify-center bg-blue-700 hover:bg-blue-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all shadow-md"
+          className="mt-2 flex items-center gap-3 text-3xl font-black tabular-nums transition-colors hover:text-brand-ink"
         >
-          Call Dispatch: {phoneNumber}
+          <Phone aria-hidden className="size-6 text-brand-ink" />
+          {phoneNumber}
         </a>
+        <p className="mt-3 text-sm text-muted">Need it sooner? Call us and we’ll do our best to fit you in.</p>
       </div>
-    </motion.div>
+
+      <Card className="p-6 sm:p-8">
+        <dl className="space-y-6">
+          <Detail icon={Mail} label="Email">
+            <a href={`mailto:${contactEmail}`} className="break-all transition-colors hover:text-brand-ink">
+              {contactEmail}
+            </a>
+          </Detail>
+
+          <Detail icon={MapPin} label="Service area">
+            {site.city} &amp; the Thompson-Okanagan, {site.address.region}
+          </Detail>
+
+          <Detail icon={Clock} label="Hours">
+            <ul className="space-y-1">
+              {hours.map((line) => (
+                <li key={line.label} className="flex justify-between gap-6">
+                  <span className="text-muted">{line.label}</span>
+                  <span className="tabular-nums">{line.value}</span>
+                </li>
+              ))}
+            </ul>
+          </Detail>
+        </dl>
+      </Card>
+
+      <p className="flex items-center gap-2 text-sm font-semibold text-muted">
+        <ShieldCheck aria-hidden className="size-4 shrink-0 text-brand-ink" />
+        Fully insured ($5M) &amp; WorkSafeBC covered
+      </p>
+    </div>
   );
 }

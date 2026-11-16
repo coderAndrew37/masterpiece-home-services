@@ -51,6 +51,8 @@ export const site = {
    */
   socialLinks: [] as string[],
 
+  foundingDate: '2025',
+
   /**
    * Set this only from a real, checkable source (e.g. Google Business Profile).
    * The homepage shows a rating line only when this is non-null.
@@ -72,6 +74,7 @@ export const site = {
     blog: '/blog',
     serviceAreas: '/service-areas',
     contact: '/contact', // confirm this route exists
+    about: '/about', // confirm this route exists
   },
 
   images: {
