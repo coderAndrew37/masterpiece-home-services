@@ -12,6 +12,7 @@ import { urlFor } from '@/lib/sanity/client';
 import type { PostCard, PostDetail } from '@/types/blog';
 import type { RelatedServiceItem } from '@/types/service';
 import BlogDetailClient from './page.client';
+import { createMetadata } from '@/lib/seo/metadata';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.masterpiecehomeservices.ca';
 
@@ -45,49 +46,25 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await client.fetch<PostDetail | null>(postBySlugQuery, { slug });
 
-  if (!post) {
-    return { title: 'Article Not Found | Masterpiece Kamloops' };
-  }
+  if (!post) return { title: 'Article not found', robots: { index: false, follow: false } };
 
-  const title = post.seoTitle || post.title;
-  const description = post.seoDescription || post.aeoQuickAnswer || post.excerpt;
   const imageSource = post.seoImage || post.mainImage;
-  
-  // Safe check for metadata image URL
-  const ogImageUrl = imageSource && imageSource.asset
-    ? urlFor(imageSource)?.width(1200).height(630).url()
-    : undefined;
+  const image =
+    imageSource && imageSource.asset ? urlFor(imageSource)?.width(1200).height(630).url() : undefined;
 
-  const postUrl = `${SITE_URL}/blog/${post.slug}`;
-
-  return {
-    title: `${title} | Masterpiece Blog`,
-    description,
+  return createMetadata({
+    title: post.seoTitle ? { absolute: post.seoTitle } : post.title,
+    description: post.seoDescription || post.aeoQuickAnswer || post.excerpt,
+    path: `/blog/${post.slug}`,
+    image, // undefined falls back to the site-wide image, so og:image is never missing
+    imageAlt: typeof post.mainImage?.alt === 'string' ? post.mainImage.alt : post.title,
+    type: 'article',
+    publishedTime: post.publishedAt,
+    modifiedTime: post.updatedAt || post.publishedAt,
+    authors: post.author ? [post.author.name] : undefined,
     keywords: post.semanticKeywords,
-    alternates: { canonical: postUrl },
-    robots: post.noIndex
-      ? { index: false, follow: true }
-      : {
-          index: true,
-          follow: true,
-          googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
-        },
-    openGraph: {
-      title,
-      description,
-      url: postUrl,
-      type: 'article',
-      publishedTime: post.publishedAt,
-      modifiedTime: post.updatedAt || post.publishedAt,
-      images: ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }] : undefined,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ogImageUrl ? [ogImageUrl] : undefined,
-    },
-  };
+    noIndex: post.noIndex,
+  });
 }
 
 export default async function BlogDetailPage({

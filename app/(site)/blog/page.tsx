@@ -3,34 +3,19 @@ import { client } from '@/lib/sanity/client';
 import { allPostsQuery } from '@/lib/sanity/queries';
 import type { PostCard } from '@/types/blog';
 import BlogClient from './page.client';
+import { createMetadata } from '@/lib/seo/metadata';
+import { site } from '@/lib/site';
 
 const SITE_URL = 'https://www.masterpiecehomeservices.ca';
 const PAGE_URL = `${SITE_URL}/blog`;
 
-export const metadata: Metadata = {
-  title: 'Blog | Masterpiece Home Services Kamloops',
+export const metadata: Metadata = createMetadata({
+  title: 'Home Care Tips & Guides for Kamloops Homeowners',
   description:
-    'Seasonal home care tips, window cleaning guides, and property maintenance advice from Masterpiece Home Services in Kamloops, BC.',
-  alternates: { canonical: PAGE_URL },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
-  },
-  openGraph: {
-    title: 'Blog | Masterpiece Home Services',
-    description:
-      'Seasonal home care tips, window cleaning guides, and property maintenance advice from Kamloops\u2019 trusted exterior care team.',
-    url: PAGE_URL,
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Blog | Masterpiece Home Services',
-    description:
-      'Seasonal home care tips, window cleaning guides, and property maintenance advice from Kamloops\u2019 trusted exterior care team.',
-  },
-};
+    'Seasonal home care tips, window cleaning guides and property maintenance advice from Masterpiece Home Services in Kamloops, BC.',
+  path: '/blog',
+  image: site.images.og,
+});
 
 export const revalidate = 60;
 

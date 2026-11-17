@@ -12,13 +12,13 @@ export default function PrivacyPolicyClient({
   return (
     <>
       <div className="bg-gradient-to-r from-blue-900 to-blue-700 py-24 text-center">
-        <motion.h1
+        <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl md:text-5xl font-bold text-white mb-4"
         >
           Privacy Policy
-        </motion.h1>
+        </motion.h2>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

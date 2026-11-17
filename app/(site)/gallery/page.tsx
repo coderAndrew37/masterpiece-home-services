@@ -3,32 +3,19 @@ import type { Metadata } from 'next';
 import { client } from '@/lib/sanity/client';
 import { homeGalleryQuery } from '@/lib/sanity/queries';
 import GalleryClient, { type GalleryImage } from './page.client';
+import { site } from '@/lib/site';
+import { createMetadata } from '@/lib/seo/metadata';
 
 const SITE_URL = 'https://www.masterpiecehomeservices.ca';
 const PAGE_URL = `${SITE_URL}/gallery`;
 
-export const metadata: Metadata = {
-  title: 'Project Gallery | Masterpiece Home Services Kamloops',
+export const metadata: Metadata = createMetadata({
+  title: 'Project Gallery: Cleaning Results in Kamloops',
   description:
-    'See completed window detailing, soft washing, eavestrough clearing, and pressure washing projects from Masterpiece Home Services in Kamloops, BC.',
-  alternates: { canonical: PAGE_URL },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
-  },
-  openGraph: {
-    title: 'Work Gallery | Masterpiece Home Services Kamloops',
-    description: 'Real transformations from our Kamloops exterior and interior cleaning projects.',
-    url: PAGE_URL,
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Work Gallery | Masterpiece Home Services Kamloops',
-    description: 'Real transformations from our Kamloops exterior and interior cleaning projects.',
-  },
-};
+    'See completed window cleaning, soft washing, gutter cleaning and pressure washing projects from Masterpiece Home Services in Kamloops, BC.',
+  path: '/gallery',
+  image: site.images.og,
+});
 
 interface SanityGalleryItem {
   _id: string;
